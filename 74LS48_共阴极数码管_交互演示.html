@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>74LS48 驱动共阴极数码管交互演示</title>
+<style>
+  :root{
+    --bg:#f6f7fb;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --line:#d1d5db;
+    --off:#d9dde5;
+    --on:#ef4444;
+    --chip:#e8eefc;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    color:var(--text);
+    background:var(--bg);
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:24px}
+  h1{font-size:28px;margin:0 0 8px}
+  .sub{color:var(--muted);margin-bottom:20px;line-height:1.6}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .card{
+    background:var(--card);border:1px solid #e5e7eb;border-radius:16px;
+    padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.04)
+  }
+  h2{font-size:18px;margin:0 0 14px}
+  .inputs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .bit{
+    border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;
+    cursor:pointer;user-select:none;background:#fff
+  }
+  .bit strong{display:block;font-size:14px;margin-bottom:6px}
+  .bit .v{font-size:28px;font-weight:700}
+  .bit.on{background:#eef6ff;border-color:#60a5fa}
+  .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+  .ctrl{
+    border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;cursor:pointer;
+    background:#fff;user-select:none
+  }
+  .ctrl .name{font-weight:700}
+  .ctrl .state{font-size:13px;color:var(--muted);margin-top:4px}
+  .ctrl.low{border-color:#f59e0b;background:#fff7ed}
+  .chiprow{display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap}
+  .chip{
+    min-width:260px;background:var(--chip);border:2px solid #6684c6;border-radius:10px;padding:18px 20px;
+  }
+  .chip-title{text-align:center;font-weight:800;font-size:22px;margin-bottom:12px}
+  .pins{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .pin{display:flex;justify-content:space-between}
+  .displaybox{text-align:center}
+  .seven{
+    position:relative;width:170px;height:280px;margin:6px auto 10px;background:#16181d;border-radius:18px;
+    box-shadow:inset 0 0 0 5px #2b2f36;
+  }
+  .seg{position:absolute;background:var(--off);opacity:.18;border-radius:12px;transition:.15s}
+  .seg.on{background:var(--on);opacity:1;box-shadow:0 0 16px rgba(239,68,68,.55)}
+  .h{width:100px;height:18px;left:35px}
+  .v{width:18px;height:100px}
+  #a{top:24px}
+  #g{top:131px}
+  #d{bottom:24px}
+  #f{left:18px;top:42px}
+  #b{right:18px;top:42px}
+  #e{left:18px;bottom:42px}
+  #c{right:18px;bottom:42px}
+  .summary{
+    margin-top:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;
+    line-height:1.7
+  }
+  .summary b{font-size:18px}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border-bottom:1px solid #e5e7eb;padding:8px;text-align:center}
+  th{background:#f9fafb}
+  .hi{font-weight:700}
+  .note{font-size:13px;color:var(--muted);line-height:1.6;margin-top:10px}
+  .legend{display:flex;gap:14px;justify-content:center;font-size:13px;color:var(--muted)}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+  @media(max-width:800px){
+    .grid{grid-template-columns:1fr}
+    .controls{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>74LS48 驱动共阴极数码管</h1>
+  <div class="sub">
+    点击下方输入位即可修改 BCD 码。74LS48 的 a～g 输出为高电平有效，适合驱动共阴极数码管：
+    输出为 1 的段点亮，输出为 0 的段熄灭。
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>1. 修改 BCD 输入</h2>
+      <div class="inputs">
+        <div class="bit" data-bit="D"><strong>D（8）</strong><span class="v">0</span></div>
+        <div class="bit" data-bit="C"><strong>C（4）</strong><span class="v">0</span></div>
+        <div class="bit" data-bit="B"><strong>B（2）</strong><span class="v">0</span></div>
+        <div class="bit" data-bit="A"><strong>A（1）</strong><span class="v">0</span></div>
+      </div>
+
+      <h2 style="margin-top:18px">2. 控制端</h2>
+      <div class="controls">
+        <div class="ctrl" data-ctrl="LT">
+          <div class="name">LT̅</div>
+          <div class="state">1：正常</div>
+        </div>
+        <div class="ctrl" data-ctrl="RBI">
+          <div class="name">RBI̅</div>
+          <div class="state">1：正常</div>
+        </div>
+        <div class="ctrl" data-ctrl="BI">
+          <div class="name">BI̅ / RBO̅</div>
+          <div class="state">1：正常</div>
+        </div>
+      </div>
+
+      <div class="summary" id="summary"></div>
+      <div class="note">
+        说明：本演示重点覆盖考研常用的 0～9 BCD 译码，以及灯测试、灭灯、零抑制功能。
+        1010～1111 不是合法 BCD 码，因此页面将标记为“非 BCD 输入”，不把它当作十进制数字使用。
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. 芯片输出与数码管显示</h2>
+      <div class="chiprow">
+        <div class="chip">
+          <div class="chip-title">74LS48</div>
+          <div class="pins">
+            <div class="pin"><span>D C B A</span><span id="bcdText">0000</span></div>
+            <div class="pin"><span>a</span><span id="oa">1</span></div>
+            <div class="pin"><span>b</span><span id="ob">1</span></div>
+            <div class="pin"><span>c</span><span id="oc">1</span></div>
+            <div class="pin"><span>d</span><span id="od">1</span></div>
+            <div class="pin"><span>e</span><span id="oe">1</span></div>
+            <div class="pin"><span>f</span><span id="of">1</span></div>
+            <div class="pin"><span>g</span><span id="og">0</span></div>
+          </div>
+        </div>
+
+        <div class="displaybox">
+          <div class="seven">
+            <div id="a" class="seg h"></div>
+            <div id="b" class="seg v"></div>
+            <div id="c" class="seg v"></div>
+            <div id="d" class="seg h"></div>
+            <div id="e" class="seg v"></div>
+            <div id="f" class="seg v"></div>
+            <div id="g" class="seg h"></div>
+          </div>
+          <div class="legend">
+            <span><span class="dot" style="background:#ef4444"></span>亮</span>
+            <span><span class="dot" style="background:#9ca3af"></span>灭</span>
+          </div>
+        </div>
+      </div>
+
+      <table>
+        <thead><tr><th>段</th><th>a</th><th>b</th><th>c</th><th>d</th><th>e</th><th>f</th><th>g</th></tr></thead>
+        <tbody><tr id="outrow"><td>输出</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr></tbody>
+      </table>
+      <div class="note">
+        共阴极数码管公共阴极接低电平（通常接地），某段阳极被 74LS48 输出高电平时，该段导通发光。
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const bits = {D:0,C:0,B:0,A:0};
+const ctrl = {LT:1,RBI:1,BI:1};
+
+// 标准 0~9 七段码，顺序 a b c d e f g，1=点亮
+const map = {
+  0:[1,1,1,1,1,1,0],
+  1:[0,1,1,0,0,0,0],
+  2:[1,1,0,1,1,0,1],
+  3:[1,1,1,1,0,0,1],
+  4:[0,1,1,0,0,1,1],
+  5:[1,0,1,1,0,1,1],
+  6:[1,0,1,1,1,1,1],
+  7:[1,1,1,0,0,0,0],
+  8:[1,1,1,1,1,1,1],
+  9:[1,1,1,1,0,1,1]
+};
+
+document.querySelectorAll('.bit').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const k=el.dataset.bit;
+    bits[k]=bits[k]?0:1;
+    render();
+  });
+});
+document.querySelectorAll('.ctrl').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const k=el.dataset.ctrl;
+    ctrl[k]=ctrl[k]?0:1;
+    render();
+  });
+});
+
+function render(){
+  document.querySelectorAll('.bit').forEach(el=>{
+    const k=el.dataset.bit, v=bits[k];
+    el.querySelector('.v').textContent=v;
+    el.classList.toggle('on',!!v);
+  });
+  document.querySelectorAll('.ctrl').forEach(el=>{
+    const k=el.dataset.ctrl, v=ctrl[k];
+    el.classList.toggle('low',v===0);
+    el.querySelector('.state').textContent = v===0 ? '0：有效' : '1：正常';
+  });
+
+  const n = bits.D*8 + bits.C*4 + bits.B*2 + bits.A;
+  const bcd = ''+bits.D+bits.C+bits.B+bits.A;
+  document.getElementById('bcdText').textContent=bcd;
+
+  let seg=[0,0,0,0,0,0,0];
+  let status='';
+
+  // 教学版优先级：BI(灭灯) > LT(灯测试) > RBI零抑制 > 正常BCD译码
+  if(ctrl.BI===0){
+    seg=[0,0,0,0,0,0,0];
+    status='BI̅=0：灭灯，a～g 全部为 0。';
+  }else if(ctrl.LT===0){
+    seg=[1,1,1,1,1,1,1];
+    status='LT̅=0：灯测试，a～g 全部为 1，数码管显示“8”。';
+  }else if(ctrl.RBI===0 && n===0){
+    seg=[0,0,0,0,0,0,0];
+    status='RBI̅=0 且输入 0000：零抑制生效，0 被消隐。';
+  }else if(n<=9){
+    seg=map[n];
+    status=`正常译码：BCD ${bcd} = 十进制 ${n}。`;
+  }else{
+    seg=[0,0,0,0,0,0,0];
+    status=`输入 ${bcd} = ${n}，属于非 BCD 码（10～15），考研分析时通常不作为合法十进制输入。`;
+  }
+
+  const names=['a','b','c','d','e','f','g'];
+  names.forEach((name,i)=>{
+    document.getElementById(name).classList.toggle('on',!!seg[i]);
+    document.getElementById('o'+name).textContent=seg[i];
+  });
+  const tds=document.querySelectorAll('#outrow td');
+  for(let i=0;i<7;i++) tds[i+1].textContent=seg[i];
+
+  const commonCathode = '共阴极：公共阴极接 0，段输入为 1 时点亮。';
+  document.getElementById('summary').innerHTML=
+    `<b>${status}</b><br>${commonCathode}<br>`+
+    `当前控制端：LT̅=${ctrl.LT}，RBI̅=${ctrl.RBI}，BI̅/RBO̅=${ctrl.BI}`;
+}
+render();
+</script>
+</body>
+</html>

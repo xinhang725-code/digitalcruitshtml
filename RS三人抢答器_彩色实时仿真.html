@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>RS触发器三人抢答器｜彩色实时仿真</title>
+<style>
+  :root{
+    --red:#ff3b30;
+    --green:#34c759;
+    --blue:#0a84ff;
+    --yellow:#ffd60a;
+    --bg:#0b1020;
+    --panel:#11182b;
+    --ink:#ecf2ff;
+    --muted:#91a0bd;
+    --gate:#1b243b;
+    --wire0:#26324e;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#08101e,#0d1426);
+    color:var(--ink); font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  .wrap{max-width:1450px;margin:0 auto;padding:18px}
+  h1{font-size:24px;margin:0 0 8px}
+  .sub{color:var(--muted);margin-bottom:14px;line-height:1.6}
+  .toolbar{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    background:var(--panel);padding:12px;border-radius:14px;margin-bottom:14px;
+  }
+  button{
+    border:0;border-radius:10px;padding:10px 15px;font-size:15px;font-weight:700;
+    cursor:pointer;color:#fff;box-shadow:0 3px 12px #0006;
+  }
+  #btnA{background:var(--red)}
+  #btnB{background:var(--green)}
+  #btnC{background:var(--blue)}
+  #reset{background:#a98700;color:#fff6c7}
+  #reset:hover{filter:brightness(1.15)}
+  button:active{transform:translateY(1px)}
+  .winner{
+    margin-left:auto;min-width:240px;padding:8px 12px;border-radius:10px;
+    background:#0b1222;border:1px solid #26324e;font-weight:700
+  }
+  .stage{
+    background:#09101f;border:1px solid #202b45;border-radius:16px;
+    overflow:auto;box-shadow:0 10px 30px #0005;
+  }
+  svg{display:block;min-width:1250px;width:100%;height:auto}
+  .block{fill:#131d33;stroke:#9fb0cc;stroke-width:2}
+  .gate{fill:#1a2540;stroke:#b8c4d9;stroke-width:2}
+  .nandBubble{fill:#09101f;stroke:#b8c4d9;stroke-width:2}
+  .title{fill:#f5f8ff;font-size:17px;font-weight:800}
+  .small{fill:#aebbd2;font-size:13px}
+  .pin{fill:#dce6f7;font-size:12px}
+  .value{font-size:14px;font-weight:900}
+  .eq{fill:#dbe5f7;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px}
+  .wire{
+    fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;
+    transition:opacity .12s,filter .12s,stroke-width .12s;
+  }
+  .wire.off{opacity:.26;stroke-width:3;filter:none}
+  .wire.on{opacity:1;stroke-width:6;filter:drop-shadow(0 0 5px currentColor)}
+  .red{stroke:var(--red);color:var(--red)}
+  .green{stroke:var(--green);color:var(--green)}
+  .blue{stroke:var(--blue);color:var(--blue)}
+  .yellow{stroke:var(--yellow);color:var(--yellow)}
+  .node{stroke:#0b1020;stroke-width:2}
+  .node.red{fill:var(--red)} .node.green{fill:var(--green)}
+  .node.blue{fill:var(--blue)} .node.yellow{fill:var(--yellow)}
+  .lamp{stroke:#657596;stroke-width:2}
+  .lamp.off{fill:#151d2e}
+  .lamp.red.on{fill:var(--red);filter:drop-shadow(0 0 9px var(--red))}
+  .lamp.green.on{fill:var(--green);filter:drop-shadow(0 0 9px var(--green))}
+  .lamp.blue.on{fill:var(--blue);filter:drop-shadow(0 0 9px var(--blue))}
+  .legendBox{fill:#0f1729;stroke:#34415e}
+  .logicBox{fill:#0d1423;stroke:#33415e}
+  .busNote{fill:#ffe98e;font-size:12px}
+  .signalText{font-size:13px;font-weight:900}
+  .statusRow{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;margin-top:12px}
+  .card{background:var(--panel);border:1px solid #23304a;border-radius:12px;padding:10px 12px}
+  .card b{display:block;margin-bottom:4px}
+  .redT{color:var(--red)} .greenT{color:var(--green)} .blueT{color:var(--blue)} .yellowT{color:var(--yellow)}
+  @media(max-width:700px){
+    .winner{margin-left:0;width:100%}
+    .statusRow{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>RS 触发器三人抢答器 · 实时逻辑仿真</h1>
+  <div class="sub">
+    三个抢答支路都使用<strong>三输入与非门</strong>产生低有效置位信号 <b>S̅</b>，
+    后接低有效 NAND-RS 锁存器。某一路先置位后，它的 <b>Q̅=0</b> 会立即封锁另外两路。
+  </div>
+
+  <div class="toolbar">
+    <button id="btnA">A 选手抢答</button>
+    <button id="btnB">B 选手抢答</button>
+    <button id="btnC">C 选手抢答</button>
+    <button id="reset">复位 R̅=0</button>
+    <div class="winner" id="winner">当前：等待抢答</div>
+  </div>
+
+  <div class="stage">
+  <svg viewBox="0 0 1400 910" aria-label="三人RS触发器抢答器电路">
+    <text x="40" y="42" class="title">① 输入按钮 → ② 三输入与非门 → ③ NAND-RS 锁存器 → ④ 指示灯</text>
+
+    <!-- Legend -->
+    <rect x="1020" y="18" width="340" height="76" rx="12" class="legendBox"/>
+    <line x1="1040" y1="40" x2="1090" y2="40" class="wire red on"/>
+    <text x="1100" y="45" class="small">A 支路 / A反馈</text>
+    <line x1="1040" y1="66" x2="1090" y2="66" class="wire green on"/>
+    <text x="1100" y="71" class="small">B 支路 / B反馈</text>
+    <line x1="1210" y1="40" x2="1260" y2="40" class="wire blue on"/>
+    <text x="1270" y="45" class="small">C 支路 / C反馈</text>
+    <line x1="1210" y1="66" x2="1260" y2="66" class="wire yellow on"/>
+    <text x="1270" y="71" class="small">公共复位 R̅</text>
+
+    <!-- ROW A -->
+    <text x="50" y="160" class="title" fill="#ff3b30">A 选手</text>
+    <rect x="58" y="185" width="110" height="54" rx="10" class="block"/>
+    <text x="113" y="208" text-anchor="middle" class="small">按钮 A</text>
+    <text id="vA" x="113" y="229" text-anchor="middle" class="value" fill="#ff3b30">0</text>
+
+    <!-- G_A 3-input NAND -->
+    <path d="M 300 160 L 360 160 A 45 45 0 0 1 360 250 L 300 250 Z" class="gate"/>
+    <circle cx="410" cy="205" r="8" class="nandBubble"/>
+    <text x="345" y="145" text-anchor="middle" class="small">G_A 三输入与非</text>
+    <text x="287" y="180" class="pin">A</text>
+    <text x="272" y="207" class="pin">Q̅B</text>
+    <text x="272" y="234" class="pin">Q̅C</text>
+    <text id="sAtext" x="430" y="200" class="signalText" fill="#ff3b30">S̅A=1</text>
+
+    <!-- RS A -->
+    <rect x="540" y="155" width="210" height="110" rx="14" class="block"/>
+    <text x="645" y="178" text-anchor="middle" class="title">RS_A</text>
+    <text x="552" y="205" class="pin">S̅</text>
+    <text x="552" y="243" class="pin">R̅</text>
+    <text x="717" y="205" class="pin">Q</text>
+    <text x="701" y="243" class="pin">Q̅</text>
+    <text id="qaText" x="630" y="205" class="value" fill="#ff3b30">Q=0</text>
+    <text id="qbaText" x="630" y="243" class="value" fill="#ff3b30">Q̅=1</text>
+
+    <!-- Lamp A -->
+    <circle id="lampA" cx="900" cy="207" r="28" class="lamp red off"/>
+    <text x="900" y="257" text-anchor="middle" class="small">A 指示灯</text>
+
+    <!-- A forward wires -->
+    <path id="wAin" d="M168 212 H300" class="wire red off"/>
+    <path id="wAs" d="M418 205 H540" class="wire red on"/>
+    <path id="wAq" d="M750 202 H870" class="wire red off"/>
+
+    <!-- ROW B -->
+    <text x="50" y="390" class="title" fill="#34c759">B 选手</text>
+    <rect x="58" y="415" width="110" height="54" rx="10" class="block"/>
+    <text x="113" y="438" text-anchor="middle" class="small">按钮 B</text>
+    <text id="vB" x="113" y="459" text-anchor="middle" class="value" fill="#34c759">0</text>
+
+    <path d="M 300 390 L 360 390 A 45 45 0 0 1 360 480 L 300 480 Z" class="gate"/>
+    <circle cx="410" cy="435" r="8" class="nandBubble"/>
+    <text x="345" y="375" text-anchor="middle" class="small">G_B 三输入与非</text>
+    <text x="287" y="410" class="pin">B</text>
+    <text x="272" y="437" class="pin">Q̅A</text>
+    <text x="272" y="464" class="pin">Q̅C</text>
+    <text id="sBtext" x="430" y="430" class="signalText" fill="#34c759">S̅B=1</text>
+
+    <rect x="540" y="385" width="210" height="110" rx="14" class="block"/>
+    <text x="645" y="408" text-anchor="middle" class="title">RS_B</text>
+    <text x="552" y="435" class="pin">S̅</text>
+    <text x="552" y="473" class="pin">R̅</text>
+    <text x="717" y="435" class="pin">Q</text>
+    <text x="701" y="473" class="pin">Q̅</text>
+    <text id="qbText" x="630" y="435" class="value" fill="#34c759">Q=0</text>
+    <text id="qbbText" x="630" y="473" class="value" fill="#34c759">Q̅=1</text>
+
+    <circle id="lampB" cx="900" cy="437" r="28" class="lamp green off"/>
+    <text x="900" y="487" text-anchor="middle" class="small">B 指示灯</text>
+
+    <path id="wBin" d="M168 442 H300" class="wire green off"/>
+    <path id="wBs" d="M418 435 H540" class="wire green on"/>
+    <path id="wBq" d="M750 432 H870" class="wire green off"/>
+
+    <!-- ROW C -->
+    <text x="50" y="620" class="title" fill="#0a84ff">C 选手</text>
+    <rect x="58" y="645" width="110" height="54" rx="10" class="block"/>
+    <text x="113" y="668" text-anchor="middle" class="small">按钮 C</text>
+    <text id="vC" x="113" y="689" text-anchor="middle" class="value" fill="#0a84ff">0</text>
+
+    <path d="M 300 620 L 360 620 A 45 45 0 0 1 360 710 L 300 710 Z" class="gate"/>
+    <circle cx="410" cy="665" r="8" class="nandBubble"/>
+    <text x="345" y="605" text-anchor="middle" class="small">G_C 三输入与非</text>
+    <text x="287" y="640" class="pin">C</text>
+    <text x="272" y="667" class="pin">Q̅A</text>
+    <text x="272" y="694" class="pin">Q̅B</text>
+    <text id="sCtext" x="430" y="660" class="signalText" fill="#0a84ff">S̅C=1</text>
+
+    <rect x="540" y="615" width="210" height="110" rx="14" class="block"/>
+    <text x="645" y="638" text-anchor="middle" class="title">RS_C</text>
+    <text x="552" y="665" class="pin">S̅</text>
+    <text x="552" y="703" class="pin">R̅</text>
+    <text x="717" y="665" class="pin">Q</text>
+    <text x="701" y="703" class="pin">Q̅</text>
+    <text id="qcText" x="630" y="665" class="value" fill="#0a84ff">Q=0</text>
+    <text id="qbcText" x="630" y="703" class="value" fill="#0a84ff">Q̅=1</text>
+
+    <circle id="lampC" cx="900" cy="667" r="28" class="lamp blue off"/>
+    <text x="900" y="717" text-anchor="middle" class="small">C 指示灯</text>
+
+    <path id="wCin" d="M168 672 H300" class="wire blue off"/>
+    <path id="wCs" d="M418 665 H540" class="wire blue on"/>
+    <path id="wCq" d="M750 662 H870" class="wire blue off"/>
+
+    <!-- Feedback buses: colored by source Qbar -->
+    <!-- Qbar A -> B/C gates -->
+    <path id="fbA1" d="M750 240 H810 V315 H245 V437 H300" class="wire red on"/>
+    <path id="fbA2" d="M810 315 V545 H230 V667 H300" class="wire red on"/>
+    <text x="817" y="310" class="small" fill="#ff7d74">Q̅A 互锁</text>
+
+    <!-- Qbar B -> A/C -->
+    <path id="fbB1" d="M750 470 H835 V325 H260 V207 H300" class="wire green on"/>
+    <path id="fbB2" d="M835 470 V565 H255 V694 H300" class="wire green on"/>
+    <text x="842" y="463" class="small" fill="#6ee789">Q̅B 互锁</text>
+
+    <!-- Qbar C -> A/B -->
+    <path id="fbC1" d="M750 700 H860 V335 H275 V234 H300" class="wire blue on"/>
+    <path id="fbC2" d="M860 700 V575 H270 V464 H300" class="wire blue on"/>
+    <text x="867" y="692" class="small" fill="#61b5ff">Q̅C 互锁</text>
+
+    <!-- Reset yellow bus -->
+    <path id="resetBus" d="M1070 800 H500 V243 H540 M500 473 H540 M500 703 H540" class="wire yellow on"/>
+    <rect x="1070" y="773" width="180" height="54" rx="10" class="block"/>
+    <text x="1160" y="797" text-anchor="middle" class="small">公共复位</text>
+    <text id="rbarText" x="1160" y="819" text-anchor="middle" class="value" fill="#ffd60a">R̅=1</text>
+
+    <!-- equations -->
+    <rect x="970" y="135" width="390" height="270" rx="14" class="logicBox"/>
+    <text x="995" y="166" class="title">逻辑关系</text>
+    <text x="995" y="202" class="eq">S̅A = ¬( A · Q̅B · Q̅C )</text>
+    <text x="995" y="230" class="eq">S̅B = ¬( B · Q̅A · Q̅C )</text>
+    <text x="995" y="258" class="eq">S̅C = ¬( C · Q̅A · Q̅B )</text>
+    <text x="995" y="302" class="small">低有效 NAND-RS：</text>
+    <text x="995" y="328" class="eq">S̅=0, R̅=1  →  Q=1（置位）</text>
+    <text x="995" y="354" class="eq">S̅=1, R̅=0  →  Q=0（复位）</text>
+    <text x="995" y="380" class="eq">S̅=1, R̅=1  →  保持</text>
+
+    <rect x="970" y="430" width="390" height="240" rx="14" class="logicBox"/>
+    <text x="995" y="462" class="title">为什么能“先到先得”？</text>
+    <text x="995" y="497" class="small">例如 A 先按：</text>
+    <text x="995" y="525" class="eq">A=1, Q̅B=1, Q̅C=1</text>
+    <text x="995" y="552" class="eq">⇒ S̅A=0 ⇒ RS_A 置位 ⇒ QA=1</text>
+    <text x="995" y="579" class="eq">⇒ Q̅A=0</text>
+    <text x="995" y="606" class="eq">⇒ G_B、G_C 都被 0 封锁</text>
+    <text x="995" y="633" class="eq">⇒ 后按 B/C 也不能再置位</text>
+
+    <text x="50" y="855" class="busNote">线色：红=A，绿=B，蓝=C，黄=公共复位。亮线=逻辑1，暗线=逻辑0。</text>
+  </svg>
+  </div>
+
+  <div class="statusRow">
+    <div class="card"><b class="redT">A 路</b><span id="cardA">A=0，S̅A=1，QA=0，Q̅A=1</span></div>
+    <div class="card"><b class="greenT">B 路</b><span id="cardB">B=0，S̅B=1，QB=0，Q̅B=1</span></div>
+    <div class="card"><b class="blueT">C 路</b><span id="cardC">C=0，S̅C=1，QC=0，Q̅C=1</span></div>
+    <div class="card"><b class="yellowT">公共复位</b><span id="cardR">R̅=1：正常抢答</span></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const S = {
+    A:0, B:0, C:0,
+    QA:0, QB:0, QC:0,
+    Rb:1
+  };
+
+  const $ = id => document.getElementById(id);
+  const inv = x => x ? 0 : 1;
+  const nand3 = (a,b,c) => inv(a && b && c);
+
+  function setWire(id, v){
+    const el = $(id);
+    el.classList.toggle('on', !!v);
+    el.classList.toggle('off', !v);
+  }
+
+  function setLamp(id, v){
+    const el = $(id);
+    el.classList.toggle('on', !!v);
+    el.classList.toggle('off', !v);
+  }
+
+  function compute(){
+    const QbA = inv(S.QA), QbB = inv(S.QB), QbC = inv(S.QC);
+    const SbA = nand3(S.A, QbB, QbC);
+    const SbB = nand3(S.B, QbA, QbC);
+    const SbC = nand3(S.C, QbA, QbB);
+
+    // Common asynchronous active-low reset
+    if (S.Rb === 0){
+      S.QA = S.QB = S.QC = 0;
+    } else {
+      // NAND-RS set. Mutual lockout guarantees only the first branch can get Sbar=0.
+      if (SbA === 0) S.QA = 1;
+      if (SbB === 0 && S.QA === 0) S.QB = 1;
+      if (SbC === 0 && S.QA === 0 && S.QB === 0) S.QC = 1;
+    }
+
+    // Recompute after latch update, because Qbar feedback changes immediately.
+    const nQbA = inv(S.QA), nQbB = inv(S.QB), nQbC = inv(S.QC);
+    const nSbA = nand3(S.A, nQbB, nQbC);
+    const nSbB = nand3(S.B, nQbA, nQbC);
+    const nSbC = nand3(S.C, nQbA, nQbB);
+
+    render(nSbA,nSbB,nSbC,nQbA,nQbB,nQbC);
+  }
+
+  function render(SbA,SbB,SbC,QbA,QbB,QbC){
+    $('vA').textContent=S.A; $('vB').textContent=S.B; $('vC').textContent=S.C;
+    $('sAtext').textContent=`S̅A=${SbA}`;
+    $('sBtext').textContent=`S̅B=${SbB}`;
+    $('sCtext').textContent=`S̅C=${SbC}`;
+    $('qaText').textContent=`Q=${S.QA}`; $('qbaText').textContent=`Q̅=${QbA}`;
+    $('qbText').textContent=`Q=${S.QB}`; $('qbbText').textContent=`Q̅=${QbB}`;
+    $('qcText').textContent=`Q=${S.QC}`; $('qbcText').textContent=`Q̅=${QbC}`;
+    $('rbarText').textContent=`R̅=${S.Rb}`;
+
+    setWire('wAin',S.A); setWire('wBin',S.B); setWire('wCin',S.C);
+    setWire('wAs',SbA); setWire('wBs',SbB); setWire('wCs',SbC);
+    setWire('wAq',S.QA); setWire('wBq',S.QB); setWire('wCq',S.QC);
+
+    setWire('fbA1',QbA); setWire('fbA2',QbA);
+    setWire('fbB1',QbB); setWire('fbB2',QbB);
+    setWire('fbC1',QbC); setWire('fbC2',QbC);
+    setWire('resetBus',S.Rb);
+
+    setLamp('lampA',S.QA); setLamp('lampB',S.QB); setLamp('lampC',S.QC);
+
+    $('cardA').textContent=`A=${S.A}，S̅A=${SbA}，QA=${S.QA}，Q̅A=${QbA}`;
+    $('cardB').textContent=`B=${S.B}，S̅B=${SbB}，QB=${S.QB}，Q̅B=${QbB}`;
+    $('cardC').textContent=`C=${S.C}，S̅C=${SbC}，QC=${S.QC}，Q̅C=${QbC}`;
+    $('cardR').textContent=S.Rb ? 'R̅=1：正常抢答' : 'R̅=0：异步复位中';
+
+    const w = $('winner');
+    if (S.QA) { w.textContent='当前：A 选手抢答成功'; w.style.color='var(--red)'; }
+    else if (S.QB) { w.textContent='当前：B 选手抢答成功'; w.style.color='var(--green)'; }
+    else if (S.QC) { w.textContent='当前：C 选手抢答成功'; w.style.color='var(--blue)'; }
+    else { w.textContent='当前：等待抢答'; w.style.color='var(--ink)'; }
+  }
+
+  function pulse(key, ms=180){
+    S[key]=1; compute();
+    setTimeout(()=>{S[key]=0; compute();}, ms);
+  }
+
+  $('btnA').addEventListener('click',()=>pulse('A'));
+  $('btnB').addEventListener('click',()=>pulse('B'));
+  $('btnC').addEventListener('click',()=>pulse('C'));
+
+  $('reset').addEventListener('click',()=>{
+    S.Rb=0; compute();
+    setTimeout(()=>{S.Rb=1; compute();}, 220);
+  });
+
+  compute();
+})();
+</script>
+</body>
+</html>

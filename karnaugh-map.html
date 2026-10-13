@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<title>Karnaugh Studio · 交互式卡诺图</title>
+<style>
+:root{color-scheme:dark;--bg:#090e1b;--panel:#111a2e;--panel2:#17223a;--line:#2a3954;--text:#edf3ff;--sub:#9eadc8;--accent:#8c86ff;--mint:#5be5bf;--yellow:#ffcc75;--danger:#ff8194;--size:62px;--gap:7px}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:radial-gradient(circle at 12% -8%,#283468 0,transparent 31%),radial-gradient(circle at 100% 8%,#173b4d 0,transparent 27%),var(--bg);color:var(--text);min-height:100vh}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid #9eafff;outline-offset:3px}button:disabled{opacity:.5;cursor:not-allowed}.container{max-width:1330px;margin:auto;padding:34px 24px 64px}.header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:14px}.symbol{background:linear-gradient(145deg,#a192ff,#53cfcc);color:#061121;width:51px;height:51px;border-radius:16px;display:grid;place-items:center;font-size:27px;font-weight:900;box-shadow:0 16px 38px #6965e933}.eyebrow{font-size:11px;letter-spacing:.18em;font-weight:800;color:#8de3ce}.header h1{font-size:clamp(23px,3vw,34px);letter-spacing:-.045em;margin:4px 0 6px}.header p{font-size:14px;color:var(--sub);margin:0}.mini-pill{border:1px solid #415474;border-radius:100px;padding:9px 14px;font-size:12px;color:#bdc9e4;white-space:nowrap}.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:start}.panel{border:1px solid var(--line);background:linear-gradient(165deg,#142039ed,#10192ded);border-radius:20px;box-shadow:0 16px 45px #0002}.sidebar{padding:23px;display:grid;gap:25px}.section-title{font-weight:750;font-size:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}.hint{font-size:12px;line-height:1.6;color:var(--sub)}.select-row{display:flex;flex-wrap:wrap;gap:7px}.small-btn{min-width:35px;padding:9px 11px;border-radius:10px;background:#1b2943;color:#cbd7ef;border:1px solid #31405b;font-weight:750}.small-btn.active{background:#736af129;border-color:#a097ff;color:#dcd7ff}.brushes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.brush{background:#1a2944;border:1px solid #304363;color:#d6def4;padding:11px 0;border-radius:11px;font-weight:750}.brush.active{background:#6157ec33;border-color:var(--accent);color:#d9d5ff}.brush[data-brush="1"].active{border-color:var(--mint);color:var(--mint)}.brush[data-brush="X"].active{border-color:var(--yellow);color:var(--yellow)}.field{width:100%;padding:11px 12px;margin:5px 0 10px;border:1px solid #34445f;border-radius:11px;background:#0c1528;color:var(--text);font-size:13px}.field::placeholder{color:#667a99}.action{background:linear-gradient(105deg,#8980ff,#7168ee);border:0;color:white;padding:12px 17px;border-radius:11px;font-weight:760;box-shadow:0 8px 20px #6b64ff26}.outline{border:1px solid #405273;border-radius:11px;background:#192641;color:#d4dff4;padding:11px 13px;font-weight:650}.action:hover,.outline:hover{filter:brightness(1.12)}.full{width:100%}.aside-divider{height:1px;background:var(--line)}.workspace{padding:24px;min-width:0}.workspace-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.workspace h2{margin:0 0 5px;font-size:20px}.workspace .subtitle{font-size:12px;color:var(--sub)}.mode-tabs{display:flex;padding:4px;gap:4px;border:1px solid #33425f;background:#0d172b;border-radius:12px}.mode-tabs button{border:0;border-radius:9px;background:transparent;color:#98abc8;padding:9px 12px;font-size:12px;font-weight:750}.mode-tabs button.active{background:#39476c;color:#fff}.notice{background:#142742;border:1px solid #315178;color:#a4d5f5;font-size:12px;line-height:1.6;border-radius:12px;padding:10px 14px;margin-bottom:17px}.notice.warn{background:#392a2c;border-color:#755057;color:#ffd9dc}.map-scroll{overflow:auto;padding:5px 0 14px;scrollbar-color:#435477 transparent}.map-inner{width:max-content;max-width:none;margin:4px auto 0}.map-head{display:flex;gap:10px;align-items:end;margin-bottom:7px}.corner{width:76px;min-width:76px;height:54px;display:flex;align-items:end;justify-content:center;padding-bottom:6px;text-align:center;font-size:11px;line-height:1.55;color:#aab9d4}.column-labels{display:grid;gap:var(--gap);align-items:end}.axis-caption{font-size:11px;color:#8ae9d6;text-align:center;letter-spacing:.02em;margin-bottom:3px}.column-labels .code,.row-labels .code{display:grid;place-items:center;color:#a7b9db;font-family:ui-monospace,Consolas,monospace;font-size:12px;font-weight:750}.column-labels .code{height:29px}.map-body{display:flex;gap:10px}.row-labels{width:76px;min-width:76px;display:grid;gap:var(--gap)}.row-labels .code{width:76px;min-height:var(--size);background:#101d32;border-radius:10px}.cells-wrap{position:relative}.cells-grid{display:grid;gap:var(--gap)}.cell{height:var(--size);width:var(--size);position:relative;border-radius:11px;background:#192840;border:1px solid #385070;color:#aab8d1;padding:0;transition:background .12s,border-color .12s,transform .1s}.cell:hover{transform:translateY(-1px);border-color:#afafff}.cell[data-value="1"]{background:#174c51;border-color:#4ab8a5;color:#b0f7e4}.cell[data-value="X"]{background:#54402b;border-color:#b98f50;color:#ffdb99}.cell.pending{outline:3px solid #bcb4ff;outline-offset:1px}.cell .number{position:absolute;left:7px;top:5px;font-family:ui-monospace,monospace;font-size:10px;opacity:.7}.cell .value{display:block;font-size:24px;font-weight:800;line-height:1}.group-overlay{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:2}.under-map{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:8px 0 4px}.legend{display:flex;gap:13px;flex-wrap:wrap;color:var(--sub);font-size:12px}.dot{display:inline-block;height:9px;width:9px;border-radius:3px;margin-right:5px;background:#344663}.dot.one{background:#5be5bf}.dot.x{background:#ffc977}.stats{display:flex;gap:14px;color:#9cacc6;font-size:12px;font-variant-numeric:tabular-nums}.result-card{padding:22px 24px;margin-top:18px}.result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:15px}.result-head h2{margin:0;font-size:17px}.status{font-size:11px;color:#97e4c8;border:1px solid #407969;padding:5px 9px;border-radius:100px}.formula-box{border:1px solid #34445f;border-radius:14px;padding:15px 17px;background:#0d192f;margin:10px 0}.formula-label{font-size:11px;color:#91a4c5;font-weight:750;letter-spacing:.04em}.formula{font-size:clamp(16px,2vw,23px);line-height:1.55;overflow-wrap:anywhere;margin-top:6px;font-family:ui-monospace,Consolas,"Microsoft YaHei",monospace;color:#e6eeff}.formula.main{color:#9ff5d8}.details{margin-top:12px;font-size:12px;color:#a8b9d6;line-height:1.7;overflow-wrap:anywhere}.groups{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.group-chip{display:flex;align-items:center;gap:7px;background:#14223a;border:1px solid #334561;border-radius:9px;padding:8px 10px;font-size:12px;color:#d5e0f2}.swatch{display:inline-block;width:10px;height:10px;border-radius:3px}.btnline{display:flex;gap:8px;flex-wrap:wrap}.btnline button{font-size:12px}.footer{font-size:12px;color:#7183a3;text-align:center;margin-top:25px}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:11px 17px;border-radius:11px;background:#d9fff0;color:#063d31;font-weight:700;box-shadow:0 12px 40px #0008;font-size:13px;z-index:50;pointer-events:none}.toast[hidden]{display:none}.manual-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:#bfcce5}.switch{display:flex;align-items:center;gap:6px;white-space:nowrap}.switch input{accent-color:#8c86ff}.hidden{display:none!important}@media(max-width:980px){.layout{grid-template-columns:1fr}.sidebar{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.sidebar>.aside-divider{display:none}.container{padding:24px 15px 54px}}@media(max-width:600px){.container{padding:16px 10px 35px}.header{margin-bottom:17px}.mini-pill{display:none}.workspace{padding:16px 12px}.sidebar{grid-template-columns:1fr;padding:17px}.workspace-top{align-items:start}.map-inner{margin-left:0}.result-card{padding:17px 15px}.stats{gap:8px}.symbol{width:43px;height:43px;font-size:23px}.mode-tabs{width:100%}.mode-tabs button{flex:1}.corner,.row-labels,.row-labels .code{width:54px;min-width:54px}.row-labels .code{width:54px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header"><div class="brand"><div class="symbol">K</div><div><div class="eyebrow">DIGITAL LOGIC · VISUAL LAB</div><h1>Karnaugh Studio <span style="color:#a69eff">卡诺图</span></h1><p>点选填表 · 自动最简化 · 手动画圈 · 支持边界相邻</p></div></div><div class="mini-pill">纯前端 · 无需联网</div></header>
+  <div class="layout">
+    <aside class="panel sidebar">
+      <section><div class="section-title">变量个数 <span class="hint">2–6 变量</span></div><div class="select-row" id="variable-buttons"></div><p class="hint">行、列采用格雷码顺序，相邻格仅相差一个变量。</p></section>
+      <div class="aside-divider"></div>
+      <section><div class="section-title">点击时写入</div><div class="brushes" id="brush-buttons"><button class="brush" data-brush="cycle">轮换</button><button class="brush" data-brush="1">1</button><button class="brush" data-brush="0">0</button><button class="brush" data-brush="X">X</button></div><p class="hint">轮换：0 → 1 → X → 0。右键单击可快速切换 X / 0。</p></section>
+      <div class="aside-divider"></div>
+      <section><div class="section-title">按最小项导入</div><label class="hint" for="ones-input">函数值为 1 的最小项 Σm</label><input class="field" id="ones-input" placeholder="如 0, 2, 5, 7" autocomplete="off"><label class="hint" for="dc-input">无关项 d（可留空）</label><input class="field" id="dc-input" placeholder="如 1, 9" autocomplete="off"><button class="outline full" id="import-btn">应用最小项</button></section>
+      <div class="aside-divider"></div>
+      <section><div class="section-title">快速操作</div><div class="btnline"><button class="outline" id="example-btn">载入示例</button><button class="outline" id="clear-btn">全部清零</button><button class="outline" id="reset-groups-btn">清除手动画圈</button></div></section>
+    </aside>
+    <main>
+      <section class="panel workspace">
+        <div class="workspace-top"><div><h2>交互式真值网格</h2><div class="subtitle">点击格子填写真值；颜色标注逻辑状态</div></div><div class="mode-tabs"><button id="edit-mode" class="active">✎ 填写数值</button><button id="manual-mode">▢ 手动圈组</button></div></div>
+        <div class="notice" id="guide">选择上方的笔刷，点击格子即可修改；下方实时给出最简与或式、或与式。</div>
+        <div class="map-scroll"><div class="map-inner"><div class="map-head"><div class="corner" id="axis-corner"></div><div id="column-labels" class="column-labels"></div></div><div class="map-body"><div id="row-labels" class="row-labels"></div><div class="cells-wrap" id="cells-wrap"><div class="cells-grid" id="cells-grid"></div><svg class="group-overlay" id="group-overlay" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg></div></div></div></div>
+        <div class="under-map"><div class="legend"><span><i class="dot one"></i>1 · 最小项</span><span><i class="dot"></i>0</span><span><i class="dot x"></i>X · 无关项</span></div><div class="stats" id="stats"></div></div>
+        <div class="manual-actions" id="manual-actions" hidden><label class="switch"><input id="wrap-rows" type="checkbox">行跨上下边界</label><label class="switch"><input id="wrap-cols" type="checkbox">列跨左右边界</label><button class="outline" id="undo-group">撤销上一圈</button></div>
+        <div class="btnline" style="margin-top:20px"><button class="action" id="auto-btn">✦ 自动最优圈组</button><button class="outline" id="copy-btn">复制表达式</button><button class="outline" id="svg-btn">导出 SVG 图</button></div>
+      </section>
+      <section class="panel result-card"><div class="result-head"><h2>化简结果</h2><span class="status" id="solve-status">实时计算</span></div><div class="formula-box"><div class="formula-label">最简与或式 · SOP</div><div class="formula main" id="sop">F = 0</div></div><div class="formula-box"><div class="formula-label">最简或与式 · POS</div><div class="formula" id="pos">F = 0</div></div><div class="details" id="canonical"></div><div class="details" id="manual-result"></div><div class="groups" id="groups"></div></section>
+    </main>
+  </div>
+  <footer class="footer">Karnaugh Studio · 卡诺图边缘首尾相邻，X 可参与圈组但无需覆盖 · 数据自动保存在本机浏览器</footer>
+</div><div class="toast" id="toast" hidden role="status"></div>
+<script>
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const palette = ['#6de3be','#a9a0ff','#ffce79','#6dd3ff','#ff91ac','#d2e884','#f4aeff','#ffa978','#7ec9aa','#a5baf4'];
+  const vars = ['A','B','C','D','E','F'];
+  const storeKey = 'karnaugh-studio-v1';
+  const state = {n:4,values:Array(16).fill(0),brush:'cycle',mode:'edit',manual:[],start:null,wrapRows:false,wrapCols:false};
+  try {const s = JSON.parse(localStorage.getItem(storeKey));if(s && Number.isInteger(s.n) && s.n>=2 && s.n<=6 && Array.isArray(s.values) && s.values.length===(1<<s.n)){state.n=s.n;state.values=s.values.map(v=>v===1?1:v==='X'?'X':0);state.brush=['cycle','1','0','X'].includes(s.brush)?s.brush:'cycle';}}catch(e){}
+  let recentAuto = {groups:[],posGroups:[],sop:'0',pos:'0',optimal:true};
+  let toastTimer;
+  const el = (tag,cls,t)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(t!==undefined)x.textContent=t;return x;};
+  const gray = i => i^(i>>1);
+  const fmt = (n,b)=>n.toString(2).padStart(b,'0');
+  const dims=()=>{const rowBits=Math.floor(state.n/2),colBits=state.n-rowBits;return {rowBits,colBits,rows:1<<rowBits,cols:1<<colBits,size:state.n===6?54:62,gap:7};};
+  const idx=(r,c)=>{const d=dims();return (gray(r)<<d.colBits)|gray(c);};
+  const bitCount=v=>{let count=0;while(v){v&=v-1;count++;}return count;};
+  const ones=()=>state.values.map((v,i)=>v===1?i:-1).filter(i=>i!==-1);
+  const dont=()=>state.values.map((v,i)=>v==='X'?i:-1).filter(i=>i!==-1);
+  const save=()=>{try{localStorage.setItem(storeKey,JSON.stringify({n:state.n,values:state.values,brush:state.brush}));}catch(e){}};
+  function toast(message){const t=$('toast');t.textContent=message;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.hidden=true,2400);}
+  function cubeTerm(c,pos){if(c.mask===0)return pos?'0':'1';const parts=[];for(let i=0;i<state.n;i++){const bit=1<<(state.n-i-1);if(c.mask&bit){let s=vars[i];if(pos?Boolean(c.val&bit):!(c.val&bit))s+="'";parts.push(s);}}return pos?'('+parts.join(' + ')+')':parts.join('');}
+  function solve(targetValue){
+    const required=state.values.map((v,i)=>v===targetValue?i:-1).filter(i=>i!==-1);
+    if(!required.length)return {groups:[],text:targetValue===1?'0':'1',optimal:true};
+    const forbidden=targetValue===1?0:1;
+    const cubes=[];const total=Math.pow(3,state.n);
+    for(let code=0;code<total;code++){
+      let x=code,mask=0,val=0;
+      for(let k=0;k<state.n;k++){const digit=x%3;x=Math.floor(x/3);if(digit!==2){mask|=1<<k;if(digit===1)val|=1<<k;}}
+      let invalid=false,cover=0n;
+      for(let i=0;i<state.values.length;i++){
+        if((i&mask)!==val)continue;
+        if(state.values[i]===forbidden){invalid=true;break;}
+        if(state.values[i]===targetValue)cover|=1n<<BigInt(i);
+      }
+      if(!invalid&&cover) cubes.push({mask,val,cover,lits:bitCount(mask)});
+    }
+    const primes=cubes.filter(c=>!cubes.some(p=>p.mask!==c.mask && (p.mask&c.mask)===p.mask && (c.val&p.mask)===p.val));
+    let needed=0n;for(const i of required)needed|=1n<<BigInt(i);
+    const mandatory=new Set();
+    for(const i of required){const m=1n<<BigInt(i);const covering=primes.map((p,j)=>(p.cover&m)?j:-1).filter(j=>j>=0);if(covering.length===1)mandatory.add(covering[0]);}
+    const base=[...mandatory];let baseCoverage=0n;for(const i of base)baseCoverage|=primes[i].cover;
+    function greedy(){let covered=baseCoverage;let picked=base.slice();while((covered&needed)!==needed){let winner=-1,score=-1;for(let i=0;i<primes.length;i++){if(picked.includes(i))continue;const added=bitCountBig(primes[i].cover&needed&~covered);const s=added*10-primes[i].lits;if(added&&s>score){score=s;winner=i;}}if(winner<0)break;picked.push(winner);covered|=primes[winner].cover;}
+      for(let j=picked.length-1;j>=0;j--){if(mandatory.has(picked[j]))continue;const list=picked.filter((_,k)=>k!==j);const cv=list.reduce((v,i)=>v|primes[i].cover,0n);if((cv&needed)===needed)picked.splice(j,1);}
+      return picked;
+    }
+    let best=greedy(),bestLits=best.reduce((s,i)=>s+primes[i].lits,0),steps=0,optimal=true;
+    const memo=new Map(),timeStart=performance.now();
+    function dfs(covered,chosen,litCost){
+      if(++steps>85000||performance.now()-timeStart>130){optimal=false;return;}
+      if((covered&needed)===needed){if(chosen.length<best.length||(chosen.length===best.length&&litCost<bestLits)){best=chosen.slice();bestLits=litCost;}return;}
+      if(chosen.length>=best.length)return;
+      const remain=needed&~covered,key=remain.toString();const old=memo.get(key);
+      if(old&&(old.count<chosen.length||(old.count===chosen.length&&old.lits<=litCost)))return;
+      memo.set(key,{count:chosen.length,lits:litCost});
+      let options=null;
+      for(const i of required){const bit=1n<<BigInt(i);if(!(remain&bit))continue;const choices=[];for(let j=0;j<primes.length;j++){if(!chosen.includes(j)&&(primes[j].cover&bit))choices.push(j);}if(!options||choices.length<options.length)options=choices;if(options.length===1)break;}
+      if(!options)return;
+      options.sort((a,b)=>bitCountBig(primes[b].cover&remain)-bitCountBig(primes[a].cover&remain)||primes[a].lits-primes[b].lits);
+      for(const j of options){dfs(covered|primes[j].cover,[...chosen,j],litCost+primes[j].lits);if(!optimal)return;}
+    }
+    dfs(baseCoverage,base,base.reduce((s,i)=>s+primes[i].lits,0));
+    const selected=best.map(i=>primes[i]).sort((a,b)=>bitCountBig(b.cover)-bitCountBig(a.cover)||a.mask-b.mask||a.val-b.val);
+    return {groups:selected,text:selected.map(c=>cubeTerm(c,targetValue===0)).join(targetValue===0?' · ':' + '),optimal};
+  }
+  function bitCountBig(x){let n=0;while(x){x&=x-1n;n++;}return n;}
+  function svgNode(tag,attrs,parent){const a=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.keys(attrs).forEach(k=>a.setAttribute(k,attrs[k]));parent.appendChild(a);return a;}
+  function runs(ids){const result=[];let a=null,b=null;for(const i of ids){if(a===null){a=b=i;}else if(i===b+1)b=i;else{result.push([a,b]);a=b=i;}}if(a!==null)result.push([a,b]);return result;}
+  function groupRects(groups,callback){const d=dims();groups.forEach((cube,k)=>{const rows=[],cols=[];for(let r=0;r<d.rows;r++)if(Array.from({length:d.cols},(_,c)=>idx(r,c)).some(i=>(i&cube.mask)===cube.val))rows.push(r);for(let c=0;c<d.cols;c++)if(Array.from({length:d.rows},(_,r)=>idx(r,c)).some(i=>(i&cube.mask)===cube.val))cols.push(c);for(const rr of runs(rows))for(const cc of runs(cols)){const x=cc[0]*(d.size+d.gap)+3,y=rr[0]*(d.size+d.gap)+3,w=(cc[1]-cc[0]+1)*(d.size+d.gap)-d.gap-6,h=(rr[1]-rr[0]+1)*(d.size+d.gap)-d.gap-6;callback({x,y,w,h,color:palette[k%palette.length],index:k});}});}
+  function currentGroups(){return state.mode==='manual'?state.manual:recentAuto.groups;}
+  function drawOverlay(){const d=dims(),svg=$('group-overlay'),groups=currentGroups();const w=d.cols*d.size+(d.cols-1)*d.gap,h=d.rows*d.size+(d.rows-1)*d.gap;svg.setAttribute('viewBox','0 0 '+w+' '+h);svg.setAttribute('width',w);svg.setAttribute('height',h);svg.replaceChildren();groupRects(groups,g=>{svgNode('rect',{x:g.x,y:g.y,width:g.w,height:g.h,rx:9,fill:g.color,'fill-opacity':'.065',stroke:g.color,'stroke-width':3},svg);});}
+  function renderMap(){const d=dims();document.documentElement.style.setProperty('--size',d.size+'px');const w=d.cols*d.size+(d.cols-1)*d.gap;
+    $('axis-corner').innerHTML='<span>'+vars.slice(0,d.rowBits).join('')+' ↓<br>'+vars.slice(d.rowBits,state.n).join('')+' →</span>';
+    const col=$('column-labels'),row=$('row-labels'),grid=$('cells-grid');col.replaceChildren();row.replaceChildren();grid.replaceChildren();col.style.gridTemplateColumns='repeat('+d.cols+','+d.size+'px)';row.style.gridTemplateRows='repeat('+d.rows+','+d.size+'px)';grid.style.gridTemplateColumns='repeat('+d.cols+','+d.size+'px)';grid.style.gridTemplateRows='repeat('+d.rows+','+d.size+'px)';$('cells-wrap').style.width=w+'px';
+    for(let c=0;c<d.cols;c++)col.append(el('span','code',fmt(gray(c),d.colBits)));
+    for(let r=0;r<d.rows;r++){row.append(el('span','code',fmt(gray(r),d.rowBits)));for(let c=0;c<d.cols;c++){const i=idx(r,c),v=state.values[i],btn=el('button','cell');btn.type='button';btn.dataset.value=v;btn.setAttribute('aria-label','最小项 m'+i+'，值 '+v);btn.title='m'+i+' ('+fmt(i,state.n)+')';btn.append(el('span','number','m'+i),el('span','value',String(v)));if(state.mode==='manual'&&state.start&&state.start.r===r&&state.start.c===c)btn.classList.add('pending');btn.addEventListener('click',()=>onCell(r,c,i));btn.addEventListener('contextmenu',event=>{event.preventDefault();if(state.mode==='edit'){state.values[i]=state.values[i]==='X'?0:'X';state.manual=[];render();}});grid.append(btn);}}
+    drawOverlay();
+  }
+  function selectionRange(a,b,length,wrap){if(!wrap)return Array.from({length:Math.abs(a-b)+1},(_,k)=>Math.min(a,b)+k);const ids=[];let i=a;while(true){ids.push(i);if(i===b)break;i=wrap?(i+1)%length:i+1;if(!wrap&&i>b)break;if(ids.length>length)break;}return ids;}
+  function addManualGroup(endR,endC){const d=dims(),start=state.start;state.start=null;
+    const rs=selectionRange(start.r,endR,d.rows,state.wrapRows),cs=selectionRange(start.c,endC,d.cols,state.wrapCols);
+    if(!rs.length||!cs.length||!([1,2,4,8,16,32,64].includes(rs.length*cs.length))){toast('圈组选区必须是 1、2、4、8… 个格子');return;}
+    const selected=new Set();for(const r of rs)for(const c of cs)selected.add(idx(r,c));
+    let mask=0,val=0;for(let bit=0;bit<state.n;bit++){const b=1<<bit;const bits=[...selected].map(i=>!!(i&b));if(bits.every(x=>x===bits[0])){mask|=b;if(bits[0])val|=b;}}
+    const all=[...Array(state.values.length).keys()].filter(i=>(i&mask)===val);
+    if(all.length!==selected.size||all.some(i=>!selected.has(i))){toast('此选区不符合格雷码相邻的卡诺圈组');return;}
+    if(all.some(i=>state.values[i]===0)||!all.some(i=>state.values[i]===1)){toast('圈内不能含 0，且至少要有一个 1');return;}
+    if(state.manual.some(g=>g.mask===mask&&g.val===val)){toast('这个圈组已经存在');return;}
+    state.manual.push({mask,val});toast('已添加 '+all.length+' 格圈组');
+  }
+  function onCell(r,c,i){if(state.mode==='manual'){if(!state.start){state.start={r,c};toast('已选起点，请点击另一对角格');}else addManualGroup(r,c);}else{const v=state.values[i];state.values[i]=state.brush==='cycle'?(v===0?1:v===1?'X':0):(state.brush==='1'?1:state.brush==='X'?'X':0);state.manual=[];}render();}
+  function renderResults(){const sop=solve(1),pos=solve(0);recentAuto={groups:sop.groups,posGroups:pos.groups,sop:sop.text,pos:pos.text,optimal:sop.optimal&&pos.optimal};
+    $('sop').textContent='F = '+sop.text;$('pos').textContent='F = '+pos.text;
+    const os=ones(),xs=dont();$('canonical').textContent='F('+vars.slice(0,state.n).join(',')+') = Σm('+os.join(', ')+')'+(xs.length?'，d('+xs.join(', ')+')':'');
+    $('solve-status').textContent=recentAuto.optimal?'已求得最优覆盖':'已求得有效覆盖（组合过多，未证明最优）';
+    const mText=$('manual-result');if(state.mode==='manual'){
+      let covered=0n;for(const g of state.manual)for(let i=0;i<state.values.length;i++)if(state.values[i]===1&&(i&g.mask)===g.val)covered|=1n<<BigInt(i);
+      const missed=os.filter(i=>!(covered&(1n<<BigInt(i))));mText.textContent=state.manual.length?(missed.length?'手动画圈尚未覆盖：m'+missed.join(', '):'手动结果：F = '+state.manual.map(g=>cubeTerm(g,false)).join(' + ')):'手动模式：点击两次指定一个矩形的对角格，可选跨边圈组。';
+    }else mText.textContent='';
+    const groups=currentGroups(),box=$('groups');box.replaceChildren();groups.forEach((g,k)=>{const div=el('span','group-chip'),dot=el('i','swatch'),count=Array.from({length:state.values.length},(_,i)=>i).filter(i=>(i&g.mask)===g.val).length;dot.style.background=palette[k%palette.length];div.append(dot,el('span','', 'G'+(k+1)+' · '+cubeTerm(g,false)+' · '+count+' 格'));box.append(div);});
+    if(!groups.length)box.append(el('span','hint',state.mode==='manual'?'尚未手动画圈':'当前无需圈组'));
+    $('stats').textContent=state.values.length+' 格 · '+os.length+' 个 1 · '+xs.length+' 个 X';
+  }
+  function renderControls(){const vb=$('variable-buttons');vb.replaceChildren();for(let n=2;n<=6;n++){const b=el('button','small-btn'+(n===state.n?' active':''),String(n));b.setAttribute('aria-pressed',String(n===state.n));b.onclick=()=>{if(n===state.n)return;state.n=n;state.values=Array(1<<n).fill(0);state.manual=[];state.start=null;render();toast('已切换到 '+n+' 变量，真值表已重置');};vb.append(b);}
+    document.querySelectorAll('[data-brush]').forEach(b=>{const a=b.dataset.brush===state.brush;b.classList.toggle('active',a);b.setAttribute('aria-pressed',String(a));});
+    $('edit-mode').classList.toggle('active',state.mode==='edit');$('manual-mode').classList.toggle('active',state.mode==='manual');$('manual-actions').hidden=state.mode!=='manual';$('guide').textContent=state.mode==='edit'?'选择笔刷后点击任意格子；X 表示无关项。支持右键快速设置 X。':'点击两个对角格建立圈组；跨首尾边缘时勾选对应方向。圈组只能覆盖 1 或 X，且格数为 2 的整数次幂。';
+    $('ones-input').value=ones().join(', ');$('dc-input').value=dont().join(', ');save();
+  }
+  function render(){renderResults();renderControls();renderMap();}
+  function parseSet(s){const cleaned=s.trim().replace(/^([Σ∑]\s*m|d)\s*\(/i,'').replace(/\)\s*$/,'');if(!cleaned.trim())return [];const toks=cleaned.split(/[,，\s;；]+/).filter(Boolean),out=[];for(const t of toks){if(!/^\d+$/.test(t))throw Error('请输入数字编号，以逗号或空格分隔');const i=Number(t);if(i<0||i>=state.values.length)throw Error('最小项 '+i+' 超出 0～'+(state.values.length-1));if(out.includes(i))throw Error('最小项 '+i+' 重复');out.push(i);}return out;}
+  $('import-btn').onclick=()=>{try{const a=parseSet($('ones-input').value),b=parseSet($('dc-input').value);if(a.some(i=>b.includes(i)))throw Error('1 项与无关项不能重叠');state.values=Array(state.values.length).fill(0);a.forEach(i=>state.values[i]=1);b.forEach(i=>state.values[i]='X');state.manual=[];state.start=null;render();toast('导入成功，已自动化简');}catch(e){toast(e.message);}};
+  $('example-btn').onclick=()=>{state.n=4;state.values=Array(16).fill(0);[0,2,5,7,8,10,13,15].forEach(i=>state.values[i]=1);[1,9].forEach(i=>state.values[i]='X');state.mode='edit';state.manual=[];state.start=null;render();toast('已载入四变量示例');};
+  $('clear-btn').onclick=()=>{state.values.fill(0);state.manual=[];state.start=null;render();toast('真值已清零');};
+  $('reset-groups-btn').onclick=()=>{state.manual=[];state.start=null;render();toast('手动画圈已清除');};
+  document.querySelectorAll('[data-brush]').forEach(b=>b.onclick=()=>{state.brush=b.dataset.brush;state.mode='edit';state.start=null;render();});
+  $('edit-mode').onclick=()=>{state.mode='edit';state.start=null;render();};$('manual-mode').onclick=()=>{state.mode='manual';state.start=null;render();};
+  $('wrap-rows').onchange=e=>{state.wrapRows=e.target.checked;state.start=null;render();};$('wrap-cols').onchange=e=>{state.wrapCols=e.target.checked;state.start=null;render();};
+  $('undo-group').onclick=()=>{state.manual.pop();state.start=null;render();};
+  $('auto-btn').onclick=()=>{state.mode='edit';state.start=null;render();toast('已显示最简与或式的自动圈组');};
+  $('copy-btn').onclick=async()=>{const s='F = '+recentAuto.sop+'\nPOS: F = '+recentAuto.pos;try{if(!navigator.clipboard)throw Error('no clipboard');await navigator.clipboard.writeText(s);toast('表达式已复制');}catch(e){const t=el('textarea');t.value=s;document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();toast(ok?'表达式已复制':'复制失败，请手动选择表达式');}};
+  $('svg-btn').onclick=()=>{const d=dims(),w=d.cols*d.size+(d.cols-1)*d.gap,h=d.rows*d.size+(d.rows-1)*d.gap,pad=68;const out=['<svg xmlns="http://www.w3.org/2000/svg" width="'+(w+pad+20)+'" height="'+(h+pad+88)+'" viewBox="0 0 '+(w+pad+20)+' '+(h+pad+88)+'">','<rect width="100%" height="100%" fill="#101b30"/>','<text x="24" y="29" font-size="18" font-family="Arial,sans-serif" fill="#f2f5ff">Karnaugh Map · '+state.n+' variables</text>'];
+    for(let c=0;c<d.cols;c++)out.push('<text x="'+(pad+c*(d.size+d.gap)+d.size/2)+'" y="'+(pad-9)+'" font-size="13" text-anchor="middle" font-family="monospace" fill="#b6c9e8">'+fmt(gray(c),d.colBits)+'</text>');
+    for(let r=0;r<d.rows;r++){out.push('<text x="'+(pad-12)+'" y="'+(pad+r*(d.size+d.gap)+d.size/2+5)+'" font-size="13" text-anchor="end" font-family="monospace" fill="#b6c9e8">'+fmt(gray(r),d.rowBits)+'</text>');for(let c=0;c<d.cols;c++){const v=state.values[idx(r,c)],x=pad+c*(d.size+d.gap),y=pad+r*(d.size+d.gap);out.push('<rect x="'+x+'" y="'+y+'" width="'+d.size+'" height="'+d.size+'" rx="9" fill="'+(v===1?'#174c51':v==='X'?'#54402b':'#1c2c46')+'" stroke="#405578"/>');out.push('<text x="'+(x+6)+'" y="'+(y+13)+'" font-size="10" fill="#a8bdd8" font-family="Arial,sans-serif">m'+idx(r,c)+'</text>');out.push('<text x="'+(x+d.size/2)+'" y="'+(y+d.size/2+9)+'" text-anchor="middle" font-size="24" font-weight="bold" fill="#ffffff" font-family="Arial,sans-serif">'+v+'</text>');}}
+    groupRects(currentGroups(),g=>out.push('<rect x="'+(pad+g.x)+'" y="'+(pad+g.y)+'" width="'+g.w+'" height="'+g.h+'" rx="9" stroke="'+g.color+'" stroke-width="3" fill="'+g.color+'" fill-opacity="0.06"/>'));
+    const footer='F = '+recentAuto.sop;out.push('<text x="24" y="'+(h+pad+42)+'" font-size="15" font-family="Arial,sans-serif" fill="#9ce9d6">'+footer.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</text>','</svg>');const blob=new Blob([out.join('')],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download='karnaugh-map-'+state.n+'vars.svg';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);toast('SVG 图已导出');};
+  document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;if(e.key==='Escape'){state.start=null;render();}if(['0','1','x','X'].includes(e.key)){state.brush=e.key.toUpperCase();state.mode='edit';state.start=null;render();}});
+  render();
+})();
+</script>
+</body>
+</html>

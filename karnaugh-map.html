@@ -12,10 +12,10 @@
 </head>
 <body>
 <div class="container">
-  <header class="header"><div class="brand"><div class="symbol">K</div><div><div class="eyebrow">DIGITAL LOGIC · VISUAL LAB</div><h1>Karnaugh Studio <span style="color:#a69eff">卡诺图</span></h1><p>点选填表 · 自动最简化 · 手动画圈 · 支持边界相邻</p></div></div><div class="mini-pill">纯前端 · 无需联网</div></header>
+  <header class="header"><div class="brand"><div class="symbol">K</div><div><div class="eyebrow">DIGITAL LOGIC · VISUAL LAB</div><h1>Karnaugh Studio <span style="color:#a69eff">卡诺图</span></h1><p>点选填表 · 自动最简化 · 手动画圈 · 支持边界相邻 · 自动降维</p></div></div><div class="mini-pill">纯前端 · 无需联网</div></header>
   <div class="layout">
     <aside class="panel sidebar">
-      <section><div class="section-title">变量个数 <span class="hint">2–6 变量</span></div><div class="select-row" id="variable-buttons"></div><p class="hint">行、列采用格雷码顺序，相邻格仅相差一个变量。</p></section>
+      <section><div class="section-title">变量个数 <span class="hint">2–4 变量</span></div><div class="select-row" id="variable-buttons"></div><p class="hint">行、列采用格雷码顺序，相邻格仅相差一个变量。</p></section>
       <div class="aside-divider"></div>
       <section><div class="section-title">点击时写入</div><div class="brushes" id="brush-buttons"><button class="brush" data-brush="cycle">轮换</button><button class="brush" data-brush="1">1</button><button class="brush" data-brush="0">0</button><button class="brush" data-brush="X">X</button></div><p class="hint">轮换：0 → 1 → X → 0。右键单击可快速切换 X / 0。</p></section>
       <div class="aside-divider"></div>
@@ -32,7 +32,7 @@
         <div class="manual-actions" id="manual-actions" hidden><label class="switch"><input id="wrap-rows" type="checkbox">行跨上下边界</label><label class="switch"><input id="wrap-cols" type="checkbox">列跨左右边界</label><button class="outline" id="undo-group">撤销上一圈</button></div>
         <div class="btnline" style="margin-top:20px"><button class="action" id="auto-btn">✦ 自动最优圈组</button><button class="outline" id="copy-btn">复制表达式</button><button class="outline" id="svg-btn">导出 SVG 图</button></div>
       </section>
-      <section class="panel result-card"><div class="result-head"><h2>化简结果</h2><span class="status" id="solve-status">实时计算</span></div><div class="formula-box"><div class="formula-label">最简与或式 · SOP</div><div class="formula main" id="sop">F = 0</div></div><div class="formula-box"><div class="formula-label">最简或与式 · POS</div><div class="formula" id="pos">F = 0</div></div><div class="details" id="canonical"></div><div class="details" id="manual-result"></div><div class="groups" id="groups"></div></section>
+      <section class="panel result-card"><div class="result-head"><h2>化简结果</h2><span class="status" id="solve-status">实时计算</span></div><div class="formula-box"><div class="formula-label">最简与或式 · SOP</div><div class="formula main" id="sop">F = 0</div></div><div class="formula-box"><div class="formula-label">最简或与式 · POS</div><div class="formula" id="pos">F = 0</div></div><div class="details" id="canonical"></div><div class="formula-box"><div class="formula-label">降维分析 · 检测无关变量</div><div class="details" id="reduction">实时检测</div></div><div class="details" id="manual-result"></div><div class="groups" id="groups"></div></section>
     </main>
   </div>
   <footer class="footer">Karnaugh Studio · 卡诺图边缘首尾相邻，X 可参与圈组但无需覆盖 · 数据自动保存在本机浏览器</footer>
@@ -42,16 +42,16 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const palette = ['#ff6685','#40d9ff','#ffca45','#aa80ff','#52e59b','#ff8e45','#f66be1','#a7dc4d','#5b9dff','#e8a86b'];
-  const vars = ['A','B','C','D','E','F'];
+  const vars = ['A','B','C','D'];
   const storeKey = 'karnaugh-studio-v1';
   const state = {n:4,values:Array(16).fill(0),brush:'cycle',mode:'edit',manual:[],start:null,wrapRows:false,wrapCols:false};
-  try {const s = JSON.parse(localStorage.getItem(storeKey));if(s && Number.isInteger(s.n) && s.n>=2 && s.n<=6 && Array.isArray(s.values) && s.values.length===(1<<s.n)){state.n=s.n;state.values=s.values.map(v=>v===1?1:v==='X'?'X':0);state.brush=['cycle','1','0','X'].includes(s.brush)?s.brush:'cycle';}}catch(e){}
+  try {const s = JSON.parse(localStorage.getItem(storeKey));if(s && Number.isInteger(s.n) && s.n>=2 && s.n<=4 && Array.isArray(s.values) && s.values.length===(1<<s.n)){state.n=s.n;state.values=s.values.map(v=>v===1?1:v==='X'?'X':0);state.brush=['cycle','1','0','X'].includes(s.brush)?s.brush:'cycle';}}catch(e){}
   let recentAuto = {groups:[],posGroups:[],sop:'0',pos:'0',optimal:true};
   let toastTimer;
   const el = (tag,cls,t)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(t!==undefined)x.textContent=t;return x;};
   const gray = i => i^(i>>1);
   const fmt = (n,b)=>n.toString(2).padStart(b,'0');
-  const dims=()=>{const rowBits=Math.floor(state.n/2),colBits=state.n-rowBits;return {rowBits,colBits,rows:1<<rowBits,cols:1<<colBits,size:state.n===6?54:62,gap:7};};
+  const dims=()=>{const rowBits=Math.floor(state.n/2),colBits=state.n-rowBits;return {rowBits,colBits,rows:1<<rowBits,cols:1<<colBits,size:62,gap:7};};
   const idx=(r,c)=>{const d=dims();return (gray(r)<<d.colBits)|gray(c);};
   const bitCount=v=>{let count=0;while(v){v&=v-1;count++;}return count;};
   const ones=()=>state.values.map((v,i)=>v===1?i:-1).filter(i=>i!==-1);
@@ -129,7 +129,30 @@
     state.manual.push({mask,val});toast('已添加 '+all.length+' 格圈组');
   }
   function onCell(r,c,i){if(state.mode==='manual'){if(!state.start){state.start={r,c};toast('已选起点，请点击另一对角格');}else addManualGroup(r,c);}else{const v=state.values[i];state.values[i]=state.brush==='cycle'?(v===0?1:v===1?'X':0):(state.brush==='1'?1:state.brush==='X'?'X':0);state.manual=[];}render();}
+  function reductionInfo(){
+    // A variable is removable only if both cofactors agree for every assignment
+    // of the other variables. X is kept distinct from 0 and 1.
+    let active=Array.from({length:state.n},(_,i)=>i),table=state.values.slice();
+    const removed=[];
+    for(let bitIndex=0;bitIndex<state.n;bitIndex++){
+      const position=active.indexOf(bitIndex);
+      if(position<0)continue;
+      const bit=1<<(active.length-position-1);
+      if(table.some((v,i)=>!(i&bit)&&v!==table[i|bit]))continue;
+      const next=[];
+      for(let i=0;i<table.length;i++)if(!(i&bit))next.push(table[i]);
+      table=next;active.splice(position,1);removed.push(vars[bitIndex]);
+    }
+    if(!removed.length)return '当前函数没有可直接消去的变量，仍需 '+state.n+' 变量表示。';
+    const names=active.map(i=>vars[i]);
+    const base='可消去 '+removed.join('、')+'（对该变量取 0 或 1，函数值始终相同）。';
+    if(!active.length)return base+' 函数降为常量：'+(table[0]==='X'?'所有项均为无关项':table[0])+'。';
+    const terms=table.map((v,i)=>v===1?i:-1).filter(i=>i>=0);
+    const dc=table.map((v,i)=>v==='X'?i:-1).filter(i=>i>=0);
+    return base+' 可降为 '+active.length+' 变量 F('+names.join(', ')+')，最小项 Σm('+terms.join(', ')+')'+(dc.length?'，无关项 d('+dc.join(', ')+')':'')+'。';
+  }
   function renderResults(){const sop=solve(1),pos=solve(0);recentAuto={groups:sop.groups,posGroups:pos.groups,sop:sop.text,pos:pos.text,optimal:sop.optimal&&pos.optimal};
+    $('reduction').textContent=reductionInfo();
     $('sop').textContent='F = '+sop.text;$('pos').textContent='F = '+pos.text;
     const os=ones(),xs=dont();$('canonical').textContent='F('+vars.slice(0,state.n).join(',')+') = Σm('+os.join(', ')+')'+(xs.length?'，d('+xs.join(', ')+')':'');
     $('solve-status').textContent=recentAuto.optimal?'已求得最优覆盖':'已求得有效覆盖（组合过多，未证明最优）';
@@ -141,7 +164,7 @@
     if(!groups.length)box.append(el('span','hint',state.mode==='manual'?'尚未手动画圈':'当前无需圈组'));
     $('stats').textContent=state.values.length+' 格 · '+os.length+' 个 1 · '+xs.length+' 个 X';
   }
-  function renderControls(){const vb=$('variable-buttons');vb.replaceChildren();for(let n=2;n<=6;n++){const b=el('button','small-btn'+(n===state.n?' active':''),String(n));b.setAttribute('aria-pressed',String(n===state.n));b.onclick=()=>{if(n===state.n)return;state.n=n;state.values=Array(1<<n).fill(0);state.mode='edit';state.manual=[];state.start=null;render();toast('已切换到 '+n+' 变量，真值表已重置');};vb.append(b);}
+  function renderControls(){const vb=$('variable-buttons');vb.replaceChildren();for(let n=2;n<=4;n++){const b=el('button','small-btn'+(n===state.n?' active':''),String(n));b.setAttribute('aria-pressed',String(n===state.n));b.onclick=()=>{if(n===state.n)return;state.n=n;state.values=Array(1<<n).fill(0);state.mode='edit';state.manual=[];state.start=null;render();toast('已切换到 '+n+' 变量，真值表已重置');};vb.append(b);}
     document.querySelectorAll('[data-brush]').forEach(b=>{const a=b.dataset.brush===state.brush;b.classList.toggle('active',a);b.setAttribute('aria-pressed',String(a));});
     $('edit-mode').classList.toggle('active',state.mode==='edit');$('manual-mode').classList.toggle('active',state.mode==='manual');$('manual-actions').hidden=state.mode!=='manual';$('guide').textContent=state.mode==='edit'?'选择笔刷后点击任意格子；X 表示无关项。支持右键快速设置 X。':'点击两个对角格建立圈组；跨首尾边缘时勾选对应方向。圈组只能覆盖 1 或 X，且格数为 2 的整数次幂。';
     $('ones-input').value=ones().join(', ');$('dc-input').value=dont().join(', ');save();

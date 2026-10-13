@@ -13,6 +13,10 @@
 :root{--serif-ui:"Iowan Old Style","Baskerville","Palatino Linotype","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun",Georgia,serif}
 html,body,button,input,textarea,select,option,.cell,.cell .number,.cell .value,.formula,.column-labels .code,.row-labels .code,.eyebrow,.hint,.notice,.stats,.group-chip,.toast,.footer{font-family:var(--serif-ui)!important}
 button,input,textarea,select{font-family:inherit}
+
+/* Force the same serif face on every UI text node and interactive element. */
+html body,html body *:not(svg):not(path){font-family:"Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Iowan Old Style",Georgia,serif!important}
+html body button,html body input,html body select,html body textarea,html body .workspace h2,html body .mode-tabs button,html body .action,html body .outline{font-family:"Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun",Georgia,serif!important}
 </style>
 </head>
 <body>

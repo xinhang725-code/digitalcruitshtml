@@ -41,7 +41,7 @@
 (function(){
   'use strict';
   const $ = id => document.getElementById(id);
-  const palette = ['#6de3be','#a9a0ff','#ffce79','#6dd3ff','#ff91ac','#d2e884','#f4aeff','#ffa978','#7ec9aa','#a5baf4'];
+  const palette = ['#ff6685','#40d9ff','#ffca45','#aa80ff','#52e59b','#ff8e45','#f66be1','#a7dc4d','#5b9dff','#e8a86b'];
   const vars = ['A','B','C','D','E','F'];
   const storeKey = 'karnaugh-studio-v1';
   const state = {n:4,values:Array(16).fill(0),brush:'cycle',mode:'edit',manual:[],start:null,wrapRows:false,wrapCols:false};
@@ -108,7 +108,7 @@
   function runs(ids){const result=[];let a=null,b=null;for(const i of ids){if(a===null){a=b=i;}else if(i===b+1)b=i;else{result.push([a,b]);a=b=i;}}if(a!==null)result.push([a,b]);return result;}
   function groupRects(groups,callback){const d=dims();groups.forEach((cube,k)=>{const rows=[],cols=[];for(let r=0;r<d.rows;r++)if(Array.from({length:d.cols},(_,c)=>idx(r,c)).some(i=>(i&cube.mask)===cube.val))rows.push(r);for(let c=0;c<d.cols;c++)if(Array.from({length:d.rows},(_,r)=>idx(r,c)).some(i=>(i&cube.mask)===cube.val))cols.push(c);for(const rr of runs(rows))for(const cc of runs(cols)){const x=cc[0]*(d.size+d.gap)+3,y=rr[0]*(d.size+d.gap)+3,w=(cc[1]-cc[0]+1)*(d.size+d.gap)-d.gap-6,h=(rr[1]-rr[0]+1)*(d.size+d.gap)-d.gap-6;callback({x,y,w,h,color:palette[k%palette.length],index:k});}});}
   function currentGroups(){return state.mode==='manual'?state.manual:recentAuto.groups;}
-  function drawOverlay(){const d=dims(),svg=$('group-overlay'),groups=currentGroups();const w=d.cols*d.size+(d.cols-1)*d.gap,h=d.rows*d.size+(d.rows-1)*d.gap;svg.setAttribute('viewBox','0 0 '+w+' '+h);svg.setAttribute('width',w);svg.setAttribute('height',h);svg.replaceChildren();groupRects(groups,g=>{svgNode('rect',{x:g.x,y:g.y,width:g.w,height:g.h,rx:9,fill:g.color,'fill-opacity':'.065',stroke:g.color,'stroke-width':3},svg);});}
+  function drawOverlay(){const d=dims(),svg=$('group-overlay'),groups=currentGroups();const w=d.cols*d.size+(d.cols-1)*d.gap,h=d.rows*d.size+(d.rows-1)*d.gap;svg.setAttribute('viewBox','0 0 '+w+' '+h);svg.setAttribute('width',w);svg.setAttribute('height',h);svg.replaceChildren();groupRects(groups,g=>{svgNode('rect',{x:g.x,y:g.y,width:g.w,height:g.h,rx:9,fill:g.color,'fill-opacity':'.15',stroke:g.color,'stroke-width':4},svg);});}
   function renderMap(){const d=dims();document.documentElement.style.setProperty('--size',d.size+'px');const w=d.cols*d.size+(d.cols-1)*d.gap;
     $('axis-corner').innerHTML='<span>'+vars.slice(0,d.rowBits).join('')+' ↓<br>'+vars.slice(d.rowBits,state.n).join('')+' →</span>';
     const col=$('column-labels'),row=$('row-labels'),grid=$('cells-grid');col.replaceChildren();row.replaceChildren();grid.replaceChildren();col.style.gridTemplateColumns='repeat('+d.cols+','+d.size+'px)';row.style.gridTemplateRows='repeat('+d.rows+','+d.size+'px)';grid.style.gridTemplateColumns='repeat('+d.cols+','+d.size+'px)';grid.style.gridTemplateRows='repeat('+d.rows+','+d.size+'px)';$('cells-wrap').style.width=w+'px';
@@ -141,16 +141,16 @@
     if(!groups.length)box.append(el('span','hint',state.mode==='manual'?'尚未手动画圈':'当前无需圈组'));
     $('stats').textContent=state.values.length+' 格 · '+os.length+' 个 1 · '+xs.length+' 个 X';
   }
-  function renderControls(){const vb=$('variable-buttons');vb.replaceChildren();for(let n=2;n<=6;n++){const b=el('button','small-btn'+(n===state.n?' active':''),String(n));b.setAttribute('aria-pressed',String(n===state.n));b.onclick=()=>{if(n===state.n)return;state.n=n;state.values=Array(1<<n).fill(0);state.manual=[];state.start=null;render();toast('已切换到 '+n+' 变量，真值表已重置');};vb.append(b);}
+  function renderControls(){const vb=$('variable-buttons');vb.replaceChildren();for(let n=2;n<=6;n++){const b=el('button','small-btn'+(n===state.n?' active':''),String(n));b.setAttribute('aria-pressed',String(n===state.n));b.onclick=()=>{if(n===state.n)return;state.n=n;state.values=Array(1<<n).fill(0);state.mode='edit';state.manual=[];state.start=null;render();toast('已切换到 '+n+' 变量，真值表已重置');};vb.append(b);}
     document.querySelectorAll('[data-brush]').forEach(b=>{const a=b.dataset.brush===state.brush;b.classList.toggle('active',a);b.setAttribute('aria-pressed',String(a));});
     $('edit-mode').classList.toggle('active',state.mode==='edit');$('manual-mode').classList.toggle('active',state.mode==='manual');$('manual-actions').hidden=state.mode!=='manual';$('guide').textContent=state.mode==='edit'?'选择笔刷后点击任意格子；X 表示无关项。支持右键快速设置 X。':'点击两个对角格建立圈组；跨首尾边缘时勾选对应方向。圈组只能覆盖 1 或 X，且格数为 2 的整数次幂。';
     $('ones-input').value=ones().join(', ');$('dc-input').value=dont().join(', ');save();
   }
   function render(){renderResults();renderControls();renderMap();}
   function parseSet(s){const cleaned=s.trim().replace(/^([Σ∑]\s*m|d)\s*\(/i,'').replace(/\)\s*$/,'');if(!cleaned.trim())return [];const toks=cleaned.split(/[,，\s;；]+/).filter(Boolean),out=[];for(const t of toks){if(!/^\d+$/.test(t))throw Error('请输入数字编号，以逗号或空格分隔');const i=Number(t);if(i<0||i>=state.values.length)throw Error('最小项 '+i+' 超出 0～'+(state.values.length-1));if(out.includes(i))throw Error('最小项 '+i+' 重复');out.push(i);}return out;}
-  $('import-btn').onclick=()=>{try{const a=parseSet($('ones-input').value),b=parseSet($('dc-input').value);if(a.some(i=>b.includes(i)))throw Error('1 项与无关项不能重叠');state.values=Array(state.values.length).fill(0);a.forEach(i=>state.values[i]=1);b.forEach(i=>state.values[i]='X');state.manual=[];state.start=null;render();toast('导入成功，已自动化简');}catch(e){toast(e.message);}};
+  $('import-btn').onclick=()=>{try{const a=parseSet($('ones-input').value),b=parseSet($('dc-input').value);if(a.some(i=>b.includes(i)))throw Error('1 项与无关项不能重叠');state.values=Array(state.values.length).fill(0);a.forEach(i=>state.values[i]=1);b.forEach(i=>state.values[i]='X');state.mode='edit';state.manual=[];state.start=null;render();toast('导入成功，已自动彩色圈组');}catch(e){toast(e.message);}};
   $('example-btn').onclick=()=>{state.n=4;state.values=Array(16).fill(0);[0,2,5,7,8,10,13,15].forEach(i=>state.values[i]=1);[1,9].forEach(i=>state.values[i]='X');state.mode='edit';state.manual=[];state.start=null;render();toast('已载入四变量示例');};
-  $('clear-btn').onclick=()=>{state.values.fill(0);state.manual=[];state.start=null;render();toast('真值已清零');};
+  $('clear-btn').onclick=()=>{state.values.fill(0);state.mode='edit';state.manual=[];state.start=null;render();toast('真值已清零');};
   $('reset-groups-btn').onclick=()=>{state.manual=[];state.start=null;render();toast('手动画圈已清除');};
   document.querySelectorAll('[data-brush]').forEach(b=>b.onclick=()=>{state.brush=b.dataset.brush;state.mode='edit';state.start=null;render();});
   $('edit-mode').onclick=()=>{state.mode='edit';state.start=null;render();};$('manual-mode').onclick=()=>{state.mode='manual';state.start=null;render();};

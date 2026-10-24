@@ -85,3 +85,53 @@ test('Enter edits a focused SVG cell without relying on HTMLElement.click',()=>{
 test('Space selects a focused SVG signal label',()=>{
   const a=app();const sid=a.run('signals[0].id');a.emit('keydown',{key:' ',target:{tagName:'rect',dataset:{select:sid},matches(){return true}},preventDefault(){}});assert.equal(a.run('selected'),sid);
 });
+test('uploaded asynchronous counter matches all seven falling-edge states',()=>{
+ const a=app();a.run('restore(counterExample())');
+ assert.deepEqual(a.run('counterSamples().map(s=>s.state)'),['000','001','010','011','100','000','001','010']);
+ assert.deepEqual(a.run("signals.find(s=>s.name==='CP').values"),[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0]);
+});
+test('counter sample is recomputed from connections after initial state changes',()=>{
+ const a=app();a.run('restore(counterExample());edit(signals.findIndex(s=>s.name===\'Q3\'),\'initial\',1)');
+ assert.deepEqual(a.run('counterSamples().slice(0,3).map(s=>s.state)'),['100','000','001']);
+});
+test('counter simulation is invariant under all signal ordering changes',()=>{
+ const a=app();a.run('restore(counterExample())');const expected=a.run('counterSamples()');a.run('signals.reverse();draw()');assert.deepEqual(a.run('counterSamples()'),expected);
+});
+test('logic signals evaluate AND NOT with constants and unknown values',()=>{
+ const a=app();load(a,{version:2,N:4,signals:[{...manual('A',[0,1,'X',1]),id:'a'},{id:'n',name:'NOT',type:'logic',gate:'not',a:'a',values:[]},{id:'g',name:'AND',type:'logic',gate:'and',a:'n',b:'@0',values:[]}]});
+ assert.deepEqual(a.run("signals.find(s=>s.id==='n').values"),[1,0,'X',0]);assert.deepEqual(a.run("signals.find(s=>s.id==='g').values"),[0,0,0,0]);
+});
+test('counter round trip retains constants helper connections and view options',()=>{
+ const a=app();a.run('restore(counterExample())');const before=a.run('project()');a.run('restore(serialize())');assert.deepEqual(a.run('project()'),before);
+});
+test('changing a feedback input changes the counter instead of retaining a hardcoded answer',()=>{
+ const a=app();a.run('restore(counterExample());edit(signals.findIndex(s=>s.name===\'Q3\'),\'j\',\'@0\')');assert.deepEqual(a.run('counterSamples().map(s=>s.state)'),['000','001','010','011','000','001','010','011']);
+});
+test('worksheet export draws seven edge guides and only four main signals',()=>{
+ const a=app();a.run('restore(counterExample())');const svg=a.run('renderWave(true)');
+ assert.equal((svg.match(/data-edge-guide/g)||[]).length,7);assert.match(svg,/Q3/);assert.doesNotMatch(svg,/Q1_AND_Q2|NOT_Q3/);assert.match(svg,/marker-end=/);
+});
+test('pure combinational feedback resolves as X independently of row order',()=>{
+ const a=app();load(a,{version:2,N:4,signals:[{id:'a',name:'A',type:'logic',gate:'not',a:'b',values:[]},{id:'b',name:'B',type:'logic',gate:'and',a:'a',b:'@0',values:[]}]});
+ const first=a.run("signals.map(s=>({id:s.id,values:s.values})).sort((a,b)=>a.id.localeCompare(b.id))");
+ a.run('signals.reverse();draw()');assert.deepEqual(a.run("signals.map(s=>({id:s.id,values:s.values})).sort((a,b)=>a.id.localeCompare(b.id))"),first);
+ assert.deepEqual(first.map(s=>s.values),[Array(4).fill('X'),Array(4).fill('X')]);
+});
+test('the circuit can be built with ordinary editor tools without loading a preset',()=>{
+ const a=app();a.run(`
+ restore({N:16,signals:[]});clock();edit(0,'name','CP');edit(0,'cycles',7);
+ flip('jkff');flip('jkff');flip('jkff');addLogic();addLogic();
+ const outputIds=signals.filter(s=>s.type==='jkff').map(s=>s.id),gateIds=signals.filter(s=>s.type==='logic').map(s=>s.id);
+ const index=id=>signals.findIndex(s=>s.id===id),cp=signals[0].id;
+ outputIds.forEach((id,i)=>{edit(index(id),'name','Q'+(i+1));edit(index(id),'edge','fall')});
+ edit(index(gateIds[0]),'gate','not');edit(index(gateIds[0]),'a',outputIds[2]);
+ edit(index(gateIds[1]),'a',outputIds[0]);edit(index(gateIds[1]),'b',outputIds[1]);
+ edit(index(outputIds[0]),'j',gateIds[0]);edit(index(outputIds[0]),'k','@1');
+ edit(index(outputIds[1]),'clk',outputIds[0]);edit(index(outputIds[1]),'j',outputIds[0]);edit(index(outputIds[1]),'k',outputIds[0]);
+ edit(index(outputIds[2]),'j',gateIds[1]);edit(index(outputIds[2]),'k','@1');
+ gateIds.forEach(id=>edit(index(id),'auxiliary','true'));
+ view.guide=cp;view.stateIds=[...outputIds].reverse();view.style='paper';draw();
+ `);
+ assert.deepEqual(a.run('counterSamples().map(s=>s.state)'),['000','001','010','011','100','000','001','010']);
+ assert.deepEqual(a.run("signals.filter(s=>s.type==='logic').map(s=>s.auxiliary)"),[true,true]);
+});

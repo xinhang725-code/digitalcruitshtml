@@ -107,9 +107,9 @@ test('counter round trip retains constants helper connections and view options',
 test('changing a feedback input changes the counter instead of retaining a hardcoded answer',()=>{
  const a=app();a.run('restore(counterExample());edit(signals.findIndex(s=>s.name===\'Q3\'),\'j\',\'@0\')');assert.deepEqual(a.run('counterSamples().map(s=>s.state)'),['000','001','010','011','000','001','010','011']);
 });
-test('worksheet export draws seven edge guides and only four main signals',()=>{
+test('counter export draws seven edge guides and only four main signals',()=>{
  const a=app();a.run('restore(counterExample())');const svg=a.run('renderWave(true)');
- assert.equal((svg.match(/data-edge-guide/g)||[]).length,7);assert.match(svg,/Q3/);assert.doesNotMatch(svg,/Q1_AND_Q2|NOT_Q3/);assert.match(svg,/marker-end=/);
+ assert.equal((svg.match(/data-edge-guide/g)||[]).length,7);assert.match(svg,/Q3/);assert.doesNotMatch(svg,/Q1_AND_Q2|NOT_Q3/);assert.match(svg,/#9a6c27/);
 });
 test('pure combinational feedback resolves as X independently of row order',()=>{
  const a=app();load(a,{version:2,N:4,signals:[{id:'a',name:'A',type:'logic',gate:'not',a:'b',values:[]},{id:'b',name:'B',type:'logic',gate:'and',a:'a',b:'@0',values:[]}]});

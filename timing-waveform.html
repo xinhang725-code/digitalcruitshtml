@@ -120,7 +120,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 html,body,body *,svg text{font-family:var(--serif)!important}
 
-.example-picker{display:flex;gap:7px;align-items:center}.example-picker select,.extra-view select{font:inherit;background:#fff;border:1px solid var(--line);border-radius:6px;padding:7px;max-width:170px}.extra-view{margin:3px 0 15px;font-size:12px;color:#647463}.extra-view input[type=checkbox]{accent-color:var(--green);width:16px;height:16px}.analysis{border:1px solid var(--line);border-radius:10px;background:#fff;margin:15px 0;padding:15px}.analysis-head{font-size:14px;margin-bottom:12px}.analysis-head span{font-size:11px;color:var(--muted);margin-left:12px}.state-scroll{overflow:auto}.analysis table{border-collapse:collapse;width:100%;text-align:center;font-size:12px;white-space:nowrap}.analysis th,.analysis td{padding:9px 10px;border-bottom:1px solid #e9ece6}.analysis th{font-weight:500;color:#74816f}.analysis tbody tr:last-child{background:#f1f4ed}.analysis .tip{margin:12px 0 0}.board{background:#fff}
+.example-picker{display:flex;gap:7px;align-items:center}.example-picker select,.extra-view select{font:inherit;background:#fff;border:1px solid var(--line);border-radius:6px;padding:7px;max-width:170px}.extra-view{margin:3px 0 15px;font-size:12px;color:#647463}.extra-view input[type=checkbox]{accent-color:var(--green);width:16px;height:16px}.analysis{border:1px solid var(--line);border-radius:10px;background:#fff;margin:15px 0;padding:15px}.analysis-head{font-size:14px;margin-bottom:12px}.analysis-head span{font-size:11px;color:var(--muted);margin-left:12px}.state-scroll{overflow:auto}.analysis table{border-collapse:collapse;width:100%;text-align:center;font-size:12px;white-space:nowrap}.analysis th,.analysis td{padding:9px 10px;border-bottom:1px solid #e9ece6}.analysis th{font-weight:500;color:#74816f}.analysis tbody tr:last-child{background:#f1f4ed}.analysis .tip{margin:12px 0 0}
 </style></head><body>
 <div class="app">
 <header class="site-head"><div class="brand"><div class="brand-icon" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><path d="M2 19H8V8H16V19H26" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div><div class="brand-name">青研<span>数字电路实验室</span></div></div><div class="head-actions"><span class="saved" id="save-status">本机自动保存</span><button class="quiet" data-action="import">打开工程</button><div class="export-wrap"><button class="primary" id="export-toggle" data-action="export-menu" aria-expanded="false" aria-controls="export-menu">导出 ↗</button><div class="export-menu" id="export-menu" hidden><button data-export="svg">SVG 矢量图<span>适合排版、打印</span></button><button data-export="png">PNG 图片<span>2 倍分辨率 · 白色背景</span></button><button data-export="json">保存 JSON 工程<span>保留连接与全部设置</span></button></div></div></div></header>
@@ -131,7 +131,7 @@ html,body,body *,svg text{font-family:var(--serif)!important}
 <div class="board" id="board" tabindex="0" aria-label="波形区，可横向滚动"><svg id="wave" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="点击手动信号的格子编辑电平"></svg></div>
 <div class="wave-foot"><div class="legend"><span><i></i>信号</span><span><i class="clock-key"></i>时钟</span><span><i class="x-key"></i>未知 X</span></div><span id="selection-status">点击信号名称以编辑</span></div></section>
 <div class="underbar"><div class="view-options"><label for="count">时间格数 <input id="count" type="number" min="4" max="128" step="1" value="16"></label><div class="zoom"><span>缩放</span><button data-action="zoom-out" aria-label="缩小波形">−</button><output id="zoom-value">100%</output><button data-action="zoom-in" aria-label="放大波形">＋</button></div></div><div class="example-picker"><button class="quiet small" data-action="new-project">新建工程</button><select id="example-select" aria-label="示例选择"><option value="dff">D 触发器</option><option value="async5">题图 · 异步五进制</option></select><button class="quiet small" data-action="example">载入示例</button></div></div>
-<div class="view-options extra-view"><label>显示风格 <select id="view-style" aria-label="显示风格"><option value="color">彩色波形</option><option value="paper">教材黑白</option></select></label><label><input id="show-aux" type="checkbox">显示辅助信号</label><label>参考时钟 <select id="guide-source" aria-label="参考时钟"></select></label><label>对齐边沿 <select id="guide-edge" aria-label="对齐边沿"><option value="fall">下降沿</option><option value="rise">上升沿</option></select></label></div><section id="analysis" class="analysis" hidden></section>
+<div class="view-options extra-view"><label><input id="show-aux" type="checkbox">显示辅助信号</label><label>参考时钟 <select id="guide-source" aria-label="参考时钟"></select></label><label>对齐边沿 <select id="guide-edge" aria-label="对齐边沿"><option value="fall">下降沿</option><option value="rise">上升沿</option></select></label></div><section id="analysis" class="analysis" hidden></section>
 <div class="tip">点格子切换电平 · 用 0 / 1 / X 笔刷连续绘制（鼠标）· 触控可点按并横向滚动画布</div>
 <details class="guide"><summary>采样约定与使用说明</summary><p>每一格代表一个时间区间，格内电平保持不变。默认在有效边沿读取前一格的数据；可改为读取本格。多个触发器在同一边沿同时更新，级联数据始终读取更新前的 Q。初态对应第 0 格，第 0 格之前不假定额外的时钟边沿。</p><p>D：采样 D；JK：00 保持、01 置 0、10 置 1、11 翻转；T：0 保持、1 翻转；RS 为高有效同步边沿触发器，R=S=1 时输出 X。这里不模拟异步 RS 锁存器、传播延迟、建立/保持时间或亚稳态。X 表示无法确定的逻辑值。悬空输入与可能发生的未知时钟边沿会保守传播 X。</p><p>点击信号名称打开设置。自动时钟和触发器输出由参数生成；直接画波形需切换为“手动信号”。可添加与门、或门、异或门、取反门，并连接常量 0 / 1；后级时钟可选择前级 Q。选择参考时钟和对齐边沿即可生成贯穿波形的虚线与边沿后状态表。支持旧 JSON 工程；工程自动保存在当前浏览器，也可导出 JSON 备份。</p></details>
 </div><aside class="inspector" aria-label="选中信号的设置"><div class="inspector-head"><h2>信号设置</h2><span class="tag" id="selected-tag">D 触发器</span></div><div class="inspector-body" id="rows"></div></aside></main>
@@ -155,7 +155,7 @@ function id(){let n=1;while(signals.some(s=>s.id==='s'+n))n++;return 's'+n;}
 function uniqueName(base){base=base.slice(0,32);let name=base,n=1;while(signals.some(s=>s.name===name)){const suffix=String(n++);name=base.slice(0,32-suffix.length)+suffix;}return name;}
 function makeSignal(name,type='manual'){return {id:id(),name:uniqueName(name),type,color:PALETTE[signals.length%PALETTE.length],values:Array(N).fill(0),edge:'rise',initial:0,sample:'before',high:1,low:1,phase:0,start:0,cycles:0,gate:'and',auxiliary:false};}
 function example(){return {version:2,N:16,signals:[{id:'clk',name:'CLK',type:'clock',color:'#c6bfed',low:1,high:1,start:0,phase:0,values:[]},{id:'data',name:'D',type:'manual',color:'#96d7ac',values:[0,0,1,1,0,0,1,1,1,0,0,1,1,0,1,0]},{id:'q',name:'Q',type:'dff',color:'#e4bd86',clk:'clk',d:'data',edge:'rise',initial:0,sample:'before',values:[]}]};}
-function counterExample(){return {version:2,N:16,selected:'q1',view:{style:'paper',showAux:false,guide:'cp',guideEdge:'fall',stateIds:['q3','q2','q1'],note:'按图中悬空 K1、K3 为 1；清零完成后 Q3Q2Q1=000，随后释放清零。图中不计传播延迟。'},signals:[
+function counterExample(){return {version:2,N:16,selected:'q1',view:{style:'color',showAux:false,guide:'cp',guideEdge:'fall',stateIds:['q3','q2','q1'],note:'按图中悬空 K1、K3 为 1；清零完成后 Q3Q2Q1=000，随后释放清零。图中不计传播延迟。'},signals:[
  {id:'cp',name:'CP',type:'clock',low:1,high:1,cycles:7,values:[]},
  {id:'q3',name:'Q3',type:'jkff',clk:'cp',j:'and12',k:'@1',initial:0,edge:'fall',values:[]},
  {id:'q2',name:'Q2',type:'jkff',clk:'q1',j:'q1',k:'q1',initial:0,edge:'fall',values:[]},
@@ -185,7 +185,7 @@ function normalize(data){
   });
   const byName=new Map(list.map(s=>[s.name,s.id]));
   for(const s of list){for(const key of pins(s)){const ref=s[key];s[key]=ref==='@0'||ref==='@1'?ref:typeof ref==='string'?(data.version===2?(ids.has(ref)?ref:''):(byName.get(ref)||'')):'';}if(s.clk===s.id)s.clk='';}
-  const rawView=data.view||{},v={style:rawView.style==='paper'?'paper':'color',showAux:rawView.showAux===true,guide:ids.has(rawView.guide)?rawView.guide:'',guideEdge:rawView.guideEdge==='rise'?'rise':'fall',stateIds:Array.isArray(rawView.stateIds)?rawView.stateIds.filter(id=>ids.has(id)).slice(0,8):[]};
+  const rawView=data.view||{},v={style:'color',showAux:rawView.showAux===true,guide:ids.has(rawView.guide)?rawView.guide:'',guideEdge:rawView.guideEdge==='rise'?'rise':'fall',stateIds:Array.isArray(rawView.stateIds)?rawView.stateIds.filter(id=>ids.has(id)).slice(0,8):[]};
   if(typeof rawView.note==='string')v.note=rawView.note.slice(0,300);
   return {N:data.N,signals:list,view:v,selected:ids.has(data.selected)?data.selected:(list.find(s=>FF[s.type])?.id||list[0]?.id||'')};
 }
@@ -323,32 +323,30 @@ function renderInspector(){
   $('rows').innerHTML=html;
 }
 function renderWave(light=false){
-  const shown=signals.map((s,index)=>({s,index})).filter(({s})=>view.showAux||!s.auxiliary),paper=view.style==='paper';
-  const cell=44*zoom,label=122,row=paper?90:74,top=45,W=label+N*cell+30,H=Math.max(235,top+shown.length*row+18),pale=light||paper;
+  const shown=signals.map((s,index)=>({s,index})).filter(({s})=>view.showAux||!s.auxiliary);
+  const cell=44*zoom,label=122,row=74,top=45,W=label+N*cell+30,H=Math.max(235,top+shown.length*row+18),pale=light;
   const bg=pale?'#ffffff':'#142824',grid=pale?'#dde4de':'#2b4137',muted=pale?'#778775':'#839e8d',ink=pale?'#293c30':'#d1e2d3';
   const a=['<rect width="'+W+'" height="'+H+'" fill="'+bg+'"/>'];
-  if(paper)a.push('<defs><marker id="axis-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#252b28"/></marker></defs>');
-  if(!paper)for(let k=0;k<=N;k++){const x=label+k*cell;a.push('<line x1="'+x+'" y1="34" x2="'+x+'" y2="'+(H-12)+'" stroke="'+grid+'" stroke-dasharray="2 6"/><text x="'+(x+6)+'" y="22" fill="'+muted+'" font-size="10">'+k+'</text>');}
+  for(let k=0;k<=N;k++){const x=label+k*cell;a.push('<line x1="'+x+'" y1="34" x2="'+x+'" y2="'+(H-12)+'" stroke="'+grid+'" stroke-dasharray="2 6"/><text x="'+(x+6)+'" y="22" fill="'+muted+'" font-size="10">'+k+'</text>');}
   const guide=signals.find(s=>s.id===view.guide);let pulse=0;
   if(guide)for(let k=1;k<N;k++)if(edgeState(guide.values[k-1],guide.values[k],view.guideEdge)==='yes'){
-    const x=label+k*cell;a.push('<line data-edge-guide="'+(++pulse)+'" x1="'+x+'" y1="'+(top+43)+'" x2="'+x+'" y2="'+(top+Math.max(0,shown.length-1)*row+43)+'" stroke="'+(paper?'#555555':'#94b3a1')+'" stroke-width="1" stroke-dasharray="4 4" opacity=".65"/><text x="'+x+'" y="27" text-anchor="middle" fill="'+muted+'" font-size="11">'+pulse+'</text>');
+    const x=label+k*cell;a.push('<line data-edge-guide="'+(++pulse)+'" x1="'+x+'" y1="'+(top+43)+'" x2="'+x+'" y2="'+(top+Math.max(0,shown.length-1)*row+43)+'" stroke="'+(light?'#7c897e':'#94b3a1')+'" stroke-width="1" stroke-dasharray="4 4" opacity=".65"/><text x="'+x+'" y="27" text-anchor="middle" fill="'+muted+'" font-size="11">'+pulse+'</text>');
   }
   if(!shown.length)a.push('<text x="32" y="95" fill="'+ink+'" font-size="15">添加一条信号，开始绘制。</text>');
   shown.forEach(({s,index},visibleIndex)=>{
-    const y=top+visibleIndex*row,hi=y+8,lo=y+43,mid=y+25,color=paper?'#252b28':light?({clock:'#71629c',manual:'#28745e'}[s.type]||'#9a6c27'):s.color;
-    if(!light&&s.id===selected)a.push('<rect x="7" y="'+(y-3)+'" width="'+(W-14)+'" height="64" rx="5" fill="'+(paper?'#547858':'#d8edcb')+'" fill-opacity=".035"/>');
-    a.push('<text x="18" y="'+(y+20)+'" fill="'+(paper?'#252b28':ink)+'" font-size="'+(paper?19:14)+'" font-weight="500">'+esc(s.name.length>10?s.name.slice(0,9)+'…':s.name)+'</text>');
-    if(!paper)a.push('<text x="18" y="'+(y+39)+'" fill="'+muted+'" font-size="9">'+esc(s.type==='clock'?'CLOCK':s.type==='manual'?'INPUT':s.type==='logic'?s.gate.toUpperCase():s.type.replace('ff','').toUpperCase()+' · '+(s.edge==='fall'?'↓':'↑'))+'</text>');
-    if(paper)a.push('<path d="M '+(label-9)+' '+(y+54)+' V '+(y-4)+' M '+(label-9)+' '+(y+54)+' H '+(W-7)+'" stroke="#252b28" stroke-width="1.2" fill="none" marker-end="url(#axis-arrow)"/><path d="M '+(label-9)+' '+(y+54)+' V '+(y-4)+'" stroke="#252b28" stroke-width="1.2" fill="none" marker-end="url(#axis-arrow)"/>');
+    const y=top+visibleIndex*row,hi=y+8,lo=y+43,mid=y+25,color=light?({clock:'#71629c',manual:'#28745e'}[s.type]||'#9a6c27'):s.color;
+    if(!light&&s.id===selected)a.push('<rect x="7" y="'+(y-3)+'" width="'+(W-14)+'" height="64" rx="5" fill="'+'#d8edcb'+'" fill-opacity=".035"/>');
+    a.push('<text x="18" y="'+(y+20)+'" fill="'+ink+'" font-size="'+14+'" font-weight="500">'+esc(s.name.length>10?s.name.slice(0,9)+'…':s.name)+'</text>');
+    a.push('<text x="18" y="'+(y+39)+'" fill="'+muted+'" font-size="9">'+esc(s.type==='clock'?'CLOCK':s.type==='manual'?'INPUT':s.type==='logic'?s.gate.toUpperCase():s.type.replace('ff','').toUpperCase()+' · '+(s.edge==='fall'?'↓':'↑'))+'</text>');
     if(!light)a.push('<rect x="7" y="'+(y-3)+'" width="103" height="64" rx="5" fill="transparent" class="signal-hit" tabindex="0" role="button" aria-label="编辑信号 '+esc(s.name)+'" data-select="'+esc(s.id)+'"><title>'+esc(s.name)+'</title></rect>');
     for(let k=0;k<N;k++){
-      const v=s.values[k],prev=s.values[k-1],x=label+k*cell,yy=v===1?hi:v===0?lo:mid,stroke=v==='X'?(paper?'#777777':light?'#af7c32':'#e3b573'):color;
+      const v=s.values[k],prev=s.values[k-1],x=label+k*cell,yy=v===1?hi:v===0?lo:mid,stroke=v==='X'?(light?'#af7c32':'#e3b573'):color;
       if(k>0&&prev!==v){const py=prev===1?hi:prev===0?lo:mid;a.push('<path d="M '+x+' '+py+' V '+yy+'" stroke="'+stroke+'" stroke-width="1.8" fill="none"/>');}
       if(v==='X')a.push('<rect x="'+x+'" y="'+hi+'" width="'+cell+'" height="35" fill="'+stroke+'" fill-opacity=".07"/><text x="'+(x+cell/2)+'" y="'+(mid-5)+'" text-anchor="middle" fill="'+stroke+'" font-size="10">X</text>');
       a.push('<path d="M '+x+' '+yy+' H '+(x+cell)+'" stroke="'+stroke+'" stroke-width="1.8" fill="none"/>');
       if(!light&&s.type==='manual')a.push('<rect x="'+x+'" y="'+(y-3)+'" width="'+cell+'" height="60" fill="transparent" class="wave-hit" tabindex="0" role="button" aria-label="'+esc(s.name)+' 第 '+k+' 格，'+v+'" data-signal="'+index+'" data-cell="'+k+'"/>');
     }
-    if(!paper)a.push('<line x1="14" y1="'+(y+64)+'" x2="'+(W-18)+'" y2="'+(y+64)+'" stroke="'+grid+'" stroke-opacity=".55"/>');
+    a.push('<line x1="14" y1="'+(y+64)+'" x2="'+(W-18)+'" y2="'+(y+64)+'" stroke="'+grid+'" stroke-opacity=".55"/>');
   });
   if(light)return '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="Qingyan Han Serif,Source Han Serif CN,serif"><defs><style>'+$('embedded-fonts').textContent+'</style></defs>'+a.join('')+'</svg>';
   $('wave').setAttribute('width',W);$('wave').setAttribute('height',H);$('wave').setAttribute('viewBox','0 0 '+W+' '+H);$('wave').innerHTML=a.join('');
@@ -361,7 +359,7 @@ function renderAnalysis(){
 }
 function draw(){
   calc();renderWave();renderInspector();renderAnalysis();$('count').value=N;$('undo-btn').disabled=!history.length;$('redo-btn').disabled=!future.length;
-  $('canvas-meta').textContent=N+' 格 / '+signals.length+' 路信号';const s=signals.find(x=>x.id===selected);$('selection-status').textContent=s?'当前选择：'+s.name:'添加信号以开始';$('zoom-value').textContent=Math.round(zoom*100)+'%';$('view-style').value=view.style;$('show-aux').checked=view.showAux;$('guide-source').innerHTML=option('','不显示虚线',view.guide)+signals.map(s=>option(s.id,s.name,view.guide)).join('');$('guide-edge').value=view.guideEdge;persist();
+  $('canvas-meta').textContent=N+' 格 / '+signals.length+' 路信号';const s=signals.find(x=>x.id===selected);$('selection-status').textContent=s?'当前选择：'+s.name:'添加信号以开始';$('zoom-value').textContent=Math.round(zoom*100)+'%';$('show-aux').checked=view.showAux;$('guide-source').innerHTML=option('','不显示虚线',view.guide)+signals.map(s=>option(s.id,s.name,view.guide)).join('');$('guide-edge').value=view.guideEdge;persist();
 }
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function save(type){
@@ -394,7 +392,7 @@ document.addEventListener('click',event=>{
   if(action&&Object.hasOwn(actions,action))actions[action]();
   if(!event.target.closest?.('.export-wrap')){$('export-menu').hidden=true;$('export-toggle').setAttribute('aria-expanded','false');}
 });
-document.addEventListener('change',event=>{const el=event.target;if(el.id==='guide-source'){snap();view.guide=el.value;draw();return;}if(el.id==='guide-edge'){snap();view.guideEdge=el.value==='rise'?'rise':'fall';draw();return;}if(el.id==='view-style'){snap();view.style=el.value==='paper'?'paper':'color';draw();return;}if(el.id==='show-aux'){snap();view.showAux=el.checked;draw();return;}if(el.id==='count')return resize();if(el.id==='import-file')return load(event);if(el.dataset.key)edit(signals.findIndex(s=>s.id===selected),el.dataset.key,el.value);});
+document.addEventListener('change',event=>{const el=event.target;if(el.id==='guide-source'){snap();view.guide=el.value;draw();return;}if(el.id==='guide-edge'){snap();view.guideEdge=el.value==='rise'?'rise':'fall';draw();return;}if(el.id==='show-aux'){snap();view.showAux=el.checked;draw();return;}if(el.id==='count')return resize();if(el.id==='import-file')return load(event);if(el.dataset.key)edit(signals.findIndex(s=>s.id===selected),el.dataset.key,el.value);});
 document.addEventListener('keydown',event=>{
   const editing=/INPUT|TEXTAREA|SELECT/.test(event.target.tagName)||event.target.isContentEditable;
   if(event.key==='Escape'){$('export-menu').hidden=true;$('export-toggle').setAttribute('aria-expanded','false');}

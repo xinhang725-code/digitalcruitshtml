@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Waveform responsive layout checks</title>
+<style>body{margin:0;padding:16px;background:#e8ece9;font:14px system-ui}nav{display:flex;gap:16px;margin-bottom:16px}iframe{border:0;display:block;background:white;box-shadow:0 2px 20px #0001}a{color:#216b55}</style>
+<nav aria-label="预览宽度"><a href="?width=375">375 px</a><a href="?width=768">768 px</a><a href="?width=1024">1024 px</a><a href="?width=1440">1440 px</a></nav>
+<iframe id="preview" title="时序工作台响应式预览" height="1600" src="../timing-waveform.html?example=async5"></iframe>
+<script>const width=Number(new URLSearchParams(location.search).get('width'));document.getElementById('preview').width=[375,768,1024,1440].includes(width)?width:375;</script>
+</html>
